@@ -1,175 +1,212 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
-from typing import Optional, List
-from pydantic import BaseModel
 from passlib.context import CryptContext
-
-# Import database-related modules
-from database import get_db
+from database import get_db, init_db
 from models.exam import Exam
 from models.user import User
+from models.subject import Subject
+from models.user_exam import user_exams
+from schemas import UserCreate, LoginRequest, SubjectCreate, ExamCreate, ExamUpdate
 
-# Create the FastAPI application instance
+init_db()
 app = FastAPI(title="Test Management System")
 
-# JWT Configuration
-SECRET_KEY = "testcore_secret_key_very_mysterious"  # Replace with a secure key
+# JWT and Auth configurations
+SECRET_KEY = "testcore_secret_key_very_mysterious"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 3000
-
-# OAuth2 scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-# Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-# Pydantic models
-class ExamCreate(BaseModel):
-    subject: str
-    correct_answers: List[str]
-
-
-# Helper function to create JWT tokens
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+# Auth Helper Functions
+def create_access_token(data: dict):
     to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
-# Helper function to verify JWT tokens
-def verify_token(token: str):
+async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return payload
+        email: str = payload.get("sub")
+        if email is None:
+            raise credentials_exception
+        user = db.query(User).filter(User.email == email).first()
+        if user is None:
+            raise credentials_exception
+        return user
     except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+        raise credentials_exception @ app.post("/register")
 
 
-# Root endpoint
-@app.get("/")
-async def root():
-    return {"message": "Welcome to Test Management System"}
+async def register_user(user: UserCreate, db: Session = Depends(get_db)):
+    if db.query(User).filter(User.email == user.email).first():
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    hashed_password = pwd_context.hash(user.password)
+    db_user = User(name=user.name, email=user.email, password=hashed_password, is_admin=user.is_admin)
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return {"message": "User registered successfully"}
 
 
-# User registration endpoint
-@app.post("/users/")
-async def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
-    """
-    Register a new user in the system.
-    """
-    # Check if username already exists
-    if db.query(User).filter(User.username == user_data.username).first():
-        raise HTTPException(
-            status_code=400,
-            detail="Username already registered"
-        )
-
-    # Check if email already exists
-    if db.query(User).filter(User.email == user_data.email).first():
-        raise HTTPException(
-            status_code=400,
-            detail="Email already registered"
-        )
-
-    # Create new user object
-    db_user = User(
-        username=user_data.username,
-        email=user_data.email,
-        hashed_password=pwd_context.hash(user_data.password)
-    )
-
-    try:
-        # Add and commit to database
-        db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
-
-        # Return the created user (without the password)
-        return {
-            "id": db_user.id,
-            "username": db_user.username,
-            "email": db_user.email,
-            "is_active": db_user.is_active,
-            "is_admin": db_user.is_admin
-        }
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-# Login endpoint
-@app.post("/token")
+@app.post("/login")
 async def login(login_data: LoginRequest, db: Session = Depends(get_db)):
-    """
-    Authenticate user and return a JWT token.
-    """
-    user = db.query(User).filter(User.username == login_data.username).first()
-    if not user or not pwd_context.verify(login_data.password, user.hashed_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-        )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
-    )
+    user = db.query(User).filter(User.email == login_data.email).first()
+    if not user or not pwd_context.verify(login_data.password, user.password):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    access_token = create_access_token(data={"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer"}
 
-# Create exam endpoint
+
+# 2. Subject Management APIs
+@app.post("/subjects/", response_model=dict)
+async def create_subject(
+        subject: SubjectCreate,
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db)
+):
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    db_subject = Subject(title=subject.title)
+    db.add(db_subject)
+    db.commit()
+    db.refresh(db_subject)
+    return {"message": "Subject created successfully", "subject": db_subject}
+
+
+@app.get("/subjects/")
+async def get_subjects(db: Session = Depends(get_db)):
+    return db.query(Subject).all()
+
+
+# 3. Exam Management APIs
 @app.post("/exams/")
 async def create_exam(
-    exam_data: ExamCreate,
-    db: Session = Depends(get_db),
-    token: str = Depends(verify_token)
+        exam: ExamCreate,
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db)
 ):
-    """
-    Create a new exam record (requires authentication).
-    """
-    # Verify token and get the user
-    user = db.query(User).filter(User.username == token["sub"]).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    # Create exam
-    new_exam = Exam(
-        subject=exam_data.subject,
-        correct_answers=exam_data.correct_answers,  # Store list of correct answers
-        user_id=user.id  # Link exam to the authenticated user
+    db_exam = Exam(
+        title=exam.title,
+        subject_id=exam.subject_id,
+        correct_answers=exam.correct_answers,
+        wrong_answers=exam.wrong_answers
     )
+    db.add(db_exam)
+    db.commit()
+    db.refresh(db_exam)
 
-    try:
-        db.add(new_exam)
-        db.commit()
-        db.refresh(new_exam)
-        return new_exam
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+    # Create user-exam relationship
+    stmt = user_exams.insert().values(user_id=current_user.user_id, exam_id=db_exam.exam_id)
+    db.execute(stmt)
+    db.commit()
 
-# Get exams endpoint
-@app.get("/exams/")
-async def get_exams(
-        db: Session = Depends(get_db),
-        token: str = Depends(oauth2_scheme)
+    return db_exam
+
+
+@app.put("/exams/{exam_id}")
+async def update_exam_results(
+        exam_id: int,
+        exam_update: ExamUpdate,
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db)
 ):
-    """
-    Get all exams for the authenticated user (requires authentication).
-    """
-    # Verify token and get the user
-    payload = verify_token(token)
-    user = db.query(User).filter(User.username == payload["sub"]).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+    exam = db.query(Exam).filter(Exam.exam_id == exam_id).first()
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
 
-    # Return only the exams for the authenticated user
-    exams = db.query(Exam).filter(Exam.user_id == user.id).all()
-    return exams
+    # Verify user has access to this exam
+    user_exam = db.query(user_exams).filter_by(user_id=current_user.user_id, exam_id=exam_id).first()
+    if not user_exam and not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    exam.correct_answers = exam_update.correct_answers
+    exam.wrong_answers = exam_update.wrong_answers
+    db.commit()
+    return {"message": "Exam results updated successfully"}
+
+
+@app.get("/exams/")
+async def get_user_exams(
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db)
+):
+    if current_user.is_admin:
+        return db.query(Exam).all()
+    return db.query(Exam).join(user_exams).filter(user_exams.c.user_id == current_user.user_id).all()
+
+
+# 4. Admin Panel APIs
+@app.get("/admin/users/")
+async def get_all_users(
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db)
+):
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return db.query(User).all()
+
+
+@app.get("/admin/exams/")
+async def get_all_exams(
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db)
+):
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return db.query(Exam).all()
+
+
+# 5. Reporting APIs
+@app.get("/reports/user-performance/{user_id}")
+async def get_user_performance(
+        user_id: int,
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db)
+):
+    if not current_user.is_admin and current_user.user_id != user_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    exams = db.query(Exam).join(user_exams).filter(user_exams.c.user_id == user_id).all()
+
+    total_exams = len(exams)
+    total_correct = sum(exam.correct_answers for exam in exams)
+    total_wrong = sum(exam.wrong_answers for exam in exams)
+
+    return {
+        "total_exams": total_exams,
+        "total_correct_answers": total_correct,
+        "total_wrong_answers": total_wrong,
+        "average_score": total_correct / (total_correct + total_wrong) if (total_correct + total_wrong) > 0 else 0
+    }
+
+
+@app.get("/reports/subject-performance/{subject_id}")
+async def get_subject_performance(
+        subject_id: int,
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db)
+):
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    exams = db.query(Exam).filter(Exam.subject_id == subject_id).all()
+    return {
+        "total_exams": len(exams),
+        "average_correct": sum(exam.correct_answers for exam in exams) / len(exams) if exams else 0,
+        "average_wrong": sum(exam.wrong_answers for exam in exams) / len(exams) if exams else 0
+    }
