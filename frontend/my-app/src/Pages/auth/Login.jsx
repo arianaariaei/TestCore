@@ -34,7 +34,7 @@ const InputField = ({ icon: Icon, label, ...props }) => (
   </div>
 );
 
-const Login = ({ onRegisterClick }) => {
+const Login = ({ onRegisterClick, onLoginSuccess }) => {
   const [formData, setFormData] = useState({
     username: '',
     password: ''
@@ -63,7 +63,21 @@ const Login = ({ onRegisterClick }) => {
         throw new Error('لطفاً نام کاربری و رمز عبور را وارد کنید');
       }
 
-      console.log('ورود موفقیت‌آمیز', formData);
+      // Mock successful login response
+      const userData = {
+        username: formData.username,
+        fullName: 'کاربر نمونه',
+        email: 'user@example.com',
+        university: 'دانشگاه نمونه',
+        role: 'دانشجو'
+      };
+
+      // Call onLoginSuccess with user data
+      if (onLoginSuccess) {
+        onLoginSuccess(userData);
+      }
+
+      console.log('ورود موفقیت‌آمیز', userData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'خطای نامشخص در ورود');  
     } finally {

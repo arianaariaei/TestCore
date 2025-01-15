@@ -1,14 +1,32 @@
 import { useState } from 'react';
 import Login from './Pages/auth/Login';
 import Register from './Pages/auth/Register';
+import UserDashboard from './Pages/dashboard/UserDashboard';
 import './App.css';
 
 function App() {
   const [isLoginView, setIsLoginView] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userData, setUserData] = useState(null);
 
   const handleToggleView = () => {
     setIsLoginView(!isLoginView);
   };
+
+  const handleLoginSuccess = (user) => {
+    setUserData(user);
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    setUserData(null);
+    setIsAuthenticated(false);
+    setIsLoginView(true);
+  };
+
+  if (isAuthenticated) {
+    return <UserDashboard user={userData} onLogout={handleLogout} />;
+  }
 
   return (
     <div className="app-container">
@@ -28,9 +46,15 @@ function App() {
       
       <div className="auth-wrapper">
         {isLoginView ? (
-          <Login onRegisterClick={handleToggleView} />
+          <Login 
+            onRegisterClick={handleToggleView}
+            onLoginSuccess={handleLoginSuccess}
+          />
         ) : (
-          <Register onLoginClick={handleToggleView} />
+          <Register 
+            onLoginClick={handleToggleView}
+            onRegisterSuccess={() => setIsLoginView(true)}
+          />
         )}
       </div>
     </div>
