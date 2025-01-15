@@ -2,6 +2,8 @@ import { useState } from 'react';
 import Login from './Pages/auth/Login';
 import Register from './Pages/auth/Register';
 import UserDashboard from './Pages/dashboard/UserDashboard';
+import AdminDashboardrn from './Pages/dashboard/AdminDashboadrn';
+
 import './App.css';
 
 function App() {
@@ -25,9 +27,14 @@ function App() {
   };
 
   if (isAuthenticated) {
-    return <UserDashboard user={userData} onLogout={handleLogout} />;
+    const isAdmin = userData.role === 'admin';
+    return isAdmin ? (
+      <AdminDashboardrn onLogout={handleLogout} />
+    ) : (
+      <UserDashboard user={userData} onLogout={handleLogout} />
+    );
   }
-
+  
   return (
     <div className="app-container">
       <div className="glowing-background">
