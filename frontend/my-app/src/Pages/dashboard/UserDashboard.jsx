@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
 import '../../style/UserDashboard.css';
 
-const DashboardCard = ({ title, value, icon: Icon }) => (
+const GlowingBackground = () => (
+  <div className="glowing-background">
+    <div className="glow-ball-1" />
+    <div className="glow-ball-2" />
+    <div className="glow-ball-3" />
+  </div>
+);
+
+const StatCard = ({ icon, title, value, gradient }) => (
   <div className="dashboard-card">
-    <div className="card-icon">
-      <Icon />
+    <div className={`card-icon ${gradient}`}>
+      {icon}
     </div>
     <div className="card-content">
-      <h3 className="card-title">{title}</h3>
+      <p className="card-title">{title}</p>
       <p className="card-value">{value}</p>
     </div>
   </div>
@@ -16,148 +24,169 @@ const DashboardCard = ({ title, value, icon: Icon }) => (
 const ExamCard = ({ exam }) => (
   <div className="exam-card">
     <div className="exam-header">
-      <h4 className="exam-title">{exam.title}</h4>
-      <span className={`exam-status ${exam.status.toLowerCase()}`}>
+      <h3 className="exam-title">{exam.title}</h3>
+      <span className={`exam-status ${exam.status.replace(' ', '-')}`}>
         {exam.status}
       </span>
     </div>
+    
     <div className="exam-details">
       <div className="exam-stat">
-        <span className="stat-label">تعداد سوالات:</span>
+        <span className="stat-label">تعداد سوالات</span>
         <span className="stat-value">{exam.totalQuestions}</span>
       </div>
       <div className="exam-stat">
-        <span className="stat-label">پاسخ‌های درست:</span>
+        <span className="stat-label">پاسخ صحیح</span>
         <span className="stat-value correct">{exam.correctAnswers}</span>
       </div>
       <div className="exam-stat">
-        <span className="stat-label">پاسخ‌های نادرست:</span>
+        <span className="stat-label">پاسخ اشتباه</span>
         <span className="stat-value incorrect">{exam.incorrectAnswers}</span>
       </div>
     </div>
+
     <div className="exam-footer">
-      <button className="view-details-btn">مشاهده جزئیات</button>
+      <button className="view-details-btn">
+        مشاهده جزئیات
+      </button>
     </div>
   </div>
 );
 
 const UserDashboard = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('all');
   
-  const dashboardStats = {
-    totalExams: 12,
-    completedExams: 8,
-    averageScore: 85,
-    upcomingExams: 2
-  };
-
-  const recentExams = [
+  const stats = [
     {
-      id: 1,
-      title: "آزمون ریاضی ۲",
-      status: "تکمیل‌شده",
-      totalQuestions: 20,
-      correctAnswers: 16,
-      incorrectAnswers: 4,
-      date: "۱۴۰۲/۱۰/۱۵"
+      icon: (
+        <svg className="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      ),
+      title: "کل آزمون‌ها",
+      value: "24",
+      gradient: "gradient-purple"
     },
     {
-      id: 2,
-      title: "آزمون فیزیک ۱",
-      status: "در حال انجام",
-      totalQuestions: 30,
-      correctAnswers: 12,
-      incorrectAnswers: 8,
-      date: "۱۴۰۲/۱۰/۲۰"
+      icon: (
+        <svg className="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <polyline points="22 4 12 14.01 9 11.01" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      ),
+      title: "آزمون‌های تکمیل شده",
+      value: "18",
+      gradient: "gradient-green"
+    },
+    {
+      icon: (
+        <svg className="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <circle cx="12" cy="12" r="10" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <polyline points="12 6 12 12 16 14" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      ),
+      title: "در حال انجام",
+      value: "6",
+      gradient: "gradient-orange"
+    },
+    {
+      icon: (
+        <svg className="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M12 15l-2 5l9-9l-9-9l2 5l-9 4l9 4z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      ),
+      title: "میانگین نمره",
+      value: "17.8",
+      gradient: "gradient-blue"
     }
   ];
 
+  const exams = [
+    {
+      title: "آزمون ریاضی ۱",
+      status: "تکمیل شده",
+      totalQuestions: 30,
+      correctAnswers: 25,
+      incorrectAnswers: 5
+    },
+    {
+      title: "آزمون فیزیک",
+      status: "در حال انجام",
+      totalQuestions: 40,
+      correctAnswers: 15,
+      incorrectAnswers: 8
+    },
+    {
+      title: "آزمون شیمی",
+      status: "تکمیل شده",
+      totalQuestions: 35,
+      correctAnswers: 28,
+      incorrectAnswers: 7
+    },
+    {
+      title: "آزمون زبان",
+      status: "در حال انجام",
+      totalQuestions: 50,
+      correctAnswers: 20,
+      incorrectAnswers: 10
+    }
+  ];
+
+
   return (
-    <div className="dashboard-container" dir="rtl">
-      <div className="dashboard-wrapper">
-        <div className="dashboard-content">
+    <div className="dashboard-wrapper">
+      <div className="dashboard-container">
+        <GlowingBackground />
+        <div className="dashboard-main">
+          {/* Header */}
           <div className="dashboard-header">
             <div className="user-welcome">
-              <h1>خوش آمدید، کاربر عزیز</h1>
-              <p>داشبورد مدیریت آزمون‌های شما</p>
+              <h1>سلام، خوش آمدید 👋</h1>
+              <p>آخرین وضعیت آزمون‌های خود را مشاهده کنید</p>
             </div>
-            <div className="header-actions">
-              <button className="new-exam-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" className="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                آزمون جدید
-              </button>
-            </div>
+            
+            <button className="new-exam-btn">
+              <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 5v14M5 12h14" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              آزمون جدید
+            </button>
           </div>
 
+          {/* Stats Grid */}
           <div className="dashboard-stats">
-            <DashboardCard
-              title="کل آزمون‌ها"
-              value={dashboardStats.totalExams}
-              icon={() => (
-                <svg xmlns="http://www.w3.org/2000/svg" className="stat-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-              )}
-            />
-            <DashboardCard
-              title="آزمون‌های تکمیل شده"
-              value={dashboardStats.completedExams}
-              icon={() => (
-                <svg xmlns="http://www.w3.org/2000/svg" className="stat-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              )}
-            />
-            <DashboardCard
-              title="میانگین نمرات"
-              value={`${dashboardStats.averageScore}%`}
-              icon={() => (
-                <svg xmlns="http://www.w3.org/2000/svg" className="stat-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-              )}
-            />
-            <DashboardCard
-              title="آزمون‌های پیش رو"
-              value={dashboardStats.upcomingExams}
-              icon={() => (
-                <svg xmlns="http://www.w3.org/2000/svg" className="stat-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              )}
-            />
+            {stats.map((stat, index) => (
+              <StatCard key={index} {...stat} />
+            ))}
           </div>
 
+          {/* Tabs */}
           <div className="dashboard-tabs">
             <button
-              className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
-              onClick={() => setActiveTab('overview')}
+              className={`tab-btn ${activeTab === 'all' ? 'active' : ''}`}
+              onClick={() => setActiveTab('all')}
             >
-              نمای کلی
+              همه آزمون‌ها
             </button>
             <button
-              className={`tab-btn ${activeTab === 'exams' ? 'active' : ''}`}
-              onClick={() => setActiveTab('exams')}
+              className={`tab-btn ${activeTab === 'completed' ? 'active' : ''}`}
+              onClick={() => setActiveTab('completed')}
             >
-              آزمون‌ها
+              تکمیل شده
             </button>
             <button
-              className={`tab-btn ${activeTab === 'results' ? 'active' : ''}`}
-              onClick={() => setActiveTab('results')}
+              className={`tab-btn ${activeTab === 'ongoing' ? 'active' : ''}`}
+              onClick={() => setActiveTab('ongoing')}
             >
-              نتایج
+              در حال انجام
             </button>
           </div>
 
-          <div className="exams-section">
-            <h2 className="section-title">آزمون‌های اخیر</h2>
-            <div className="exams-grid">
-              {recentExams.map(exam => (
-                <ExamCard key={exam.id} exam={exam} />
-              ))}
-            </div>
+          {/* Exams Grid */}
+          <div className="exams-grid">
+            {exams.map((exam, index) => (
+              <ExamCard key={index} exam={exam} />
+            ))}
           </div>
         </div>
       </div>
