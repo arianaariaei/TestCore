@@ -71,6 +71,8 @@ async def login(login_data: LoginRequest, db: Session = Depends(get_db)):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
+
+
 # 2. Subject Management APIs
 @app.post("/subjects/", response_model=dict)
 async def create_subject(
@@ -210,3 +212,58 @@ async def get_subject_performance(
         "average_correct": sum(exam.correct_answers for exam in exams) / len(exams) if exams else 0,
         "average_wrong": sum(exam.wrong_answers for exam in exams) / len(exams) if exams else 0
     }
+
+
+# Delete User endpoint
+@app.delete("/users/{user_id}")
+async def delete_user(
+        user_id: int,
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db)
+):
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if user.is_admin:
+        raise HTTPException(status_code=400, detail="Cannot delete admin user")
+
+    try:
+        # Delete associated user_exam records first
+        db.execute(user_exams.delete().where(user_exams.c.user_id == user_id))
+        # Then delete the user
+        db.delete(user)
+        db.commit()
+        return {"message": "User deleted successfully"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Delete Exam endpoint
+@app.delete("/exams/{exam_id}")
+async def delete_exam(
+        exam_id: int,
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db)
+):
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    exam = db.query(Exam).filter(Exam.exam_id == exam_id).first()
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
+
+    try:
+        # Delete associated user_exam records first
+        db.execute(user_exams.delete().where(user_exams.c.exam_id == exam_id))
+        # Then delete the exam
+        db.delete(exam)
+        db.commit()
+        return {"message": "Exam deleted successfully"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
