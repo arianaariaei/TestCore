@@ -63,6 +63,21 @@ const Login = ({ onRegisterClick, onLoginSuccess }) => {
         throw new Error('لطفاً نام کاربری و رمز عبور را وارد کنید');
       }
 
+
+      if (formData.username === 'admin' && formData.password === '1234') {
+        // Mock successful admin login response
+        const adminData = {
+        username: formData.username,
+        role: 'admin'
+        };
+
+        // Call onLoginSuccess with admin data
+        if (onLoginSuccess) {
+          onLoginSuccess(adminData); 
+        }
+        return;
+      }
+
       // Mock successful login response
       const userData = {
         username: formData.username,
