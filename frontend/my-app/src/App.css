@@ -1,0 +1,120 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.app-container {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1a1f35 0%, #2b1f5c 100%);
+}
+
+/* Glowing Background Effects */
+.glowing-background {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.glow-ball {
+  position: absolute;
+  width: 18rem;
+  height: 18rem;
+  border-radius: 50%;
+  mix-blend-mode: multiply;
+  filter: blur(1rem);
+  opacity: 0.3;
+  animation: blob 7s infinite;
+}
+
+.glow-ball-1 {
+  top: 0;
+  left: -1rem;
+  background-color: #9333ea;
+}
+
+.glow-ball-2 {
+  top: 0;
+  right: -1rem;
+  background-color: #6366f1;
+  animation-delay: 2s;
+}
+
+.glow-ball-3 {
+  bottom: -2rem;
+  left: 5rem;
+  background-color: #3b82f6;
+  animation-delay: 4s;
+}
+
+@keyframes blob {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+/* Floating Particles */
+.floating-particle {
+  position: fixed;
+  width: 4px;
+  height: 4px;
+  background-color: white;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: float 2s infinite ease-in-out;
+}
+
+@keyframes float {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-40px) scale(1.5);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-60px) scale(0);
+  }
+}
+
+/* Auth Container */
+.auth-wrapper {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  max-width: 28rem;
+  padding: 0 1rem;
+  z-index: 10;
+}
+
+/* Remove any margin from the Login/Register components */
+.login-container,
+.register-container {
+  margin: 0 !important;
+}
