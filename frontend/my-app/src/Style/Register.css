@@ -7,6 +7,8 @@
     position: relative;
     overflow: hidden;
     background: linear-gradient(135deg, #1a1f35 0%, #2b1f5c 100%);
+    width: 600px;
+
   }
   
   /* Glowing background */

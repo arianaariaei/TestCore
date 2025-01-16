@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import '../../style/Register.css';
+import { useNavigate } from 'react-router-dom';
 
 const FloatingParticle = ({ delay }) => (
   <div
@@ -28,6 +29,9 @@ const InputField = ({ icon: Icon, label, ...props }) => (
 );
 
 const Register = ({ onLoginClick }) => {
+  const navigate = useNavigate();
+
+
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -38,6 +42,10 @@ const Register = ({ onLoginClick }) => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const handleToggleView = () => {
+    navigate('/Login'); 
+  };
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -227,7 +235,7 @@ const Register = ({ onLoginClick }) => {
 
             <button
               type="button"
-              onClick={onLoginClick}
+              onClick={handleToggleView}   
               className="login-link"
               disabled={loading}
             >

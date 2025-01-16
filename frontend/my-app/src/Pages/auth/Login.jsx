@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import '../../style/Login.css';
+import { useNavigate } from 'react-router-dom';
 
 const FloatingParticle = ({ delay }) => {
   return (
@@ -35,12 +36,18 @@ const InputField = ({ icon: Icon, label, ...props }) => (
 );
 
 const Login = ({ onRegisterClick, onLoginSuccess }) => {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     username: '',
     password: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const handleToggleView = () => {
+    navigate('/register'); // هدایت به صفحه ثبت‌نام
+  };
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -183,7 +190,7 @@ const Login = ({ onRegisterClick, onLoginSuccess }) => {
             <div className="footer">
               <button 
                 type="button"
-                onClick={onRegisterClick}  
+                onClick={handleToggleView}   
                 className="register-button"
               >
                 هنوز ثبت‌نام نکرده‌اید؟ ثبت‌نام
