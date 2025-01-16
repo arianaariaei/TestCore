@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Login from './Pages/auth/Login';
 import Register from './Pages/auth/Register';
 import UserDashboard from './Pages/dashboard/UserDashboard';
-import AdminDashboardrn from './Pages/dashboard/AdminDashboadrn';
+import AdminDashboardrn from './Pages/dashboard/AdminDashboard';
 
 import './App.css';
 

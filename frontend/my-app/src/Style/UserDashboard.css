@@ -7,8 +7,7 @@
   align-items: flex-start; 
   width: 100vw;
   background-color: #f5f5f5;
-  margin-top: 150px;
-}
+  margin: 0;}
 
 .dashboard-container {
   width: 100%;
