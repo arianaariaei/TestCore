@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import '../../style/UserDashboard.css';
+import { useNavigate } from 'react-router-dom'; 
 import { Download, Share2 } from 'lucide-react';
 
 const GlowingBackground = () => (
@@ -102,7 +103,8 @@ const ExamCard = ({ exam }) => {
   );
 };
 
-const UserDashboard = () => {
+const UserDashboard = ({ onLogout }) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
   
   const stats = [
@@ -196,9 +198,19 @@ const UserDashboard = () => {
     return true;
   });
 
+  const handleLogout = () => {
+    onLogout()
+    navigate('/login'); 
+  };
+
   return (
     <div className="dashboard-wrapper">
       <div className="dashboard-container">
+        <div className="logout_conatiner">
+            <button className="logout-button" onClick={handleLogout}>
+              خروج
+            </button>
+        </div>  
         <GlowingBackground />
         <div className="dashboard-main">
           {/* Header */}
