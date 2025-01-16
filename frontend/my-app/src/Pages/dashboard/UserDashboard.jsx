@@ -208,12 +208,6 @@ const UserDashboard = () => {
               <p>آخرین وضعیت آزمون‌های خود را مشاهده کنید</p>
             </div>
             
-            <button className="new-exam-btn">
-              <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M12 5v14M5 12h14" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              آزمون جدید
-            </button>
           </div>
 
           {/* Stats Grid */}

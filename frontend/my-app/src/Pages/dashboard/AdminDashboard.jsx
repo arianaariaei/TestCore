@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../../Style/AdminDashboard.css';
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
+
+
   const [users] = useState([
     { id: 1, username: 'user1', email: 'user1@example.com', university: 'University A', lastActive: '2024/01/15', examCount: 12 },
     { id: 2, username: 'user2', email: 'user2@example.com', university: 'University B', lastActive: '2024/01/14', examCount: 8 },
@@ -20,6 +24,7 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('users');
   const [sortField, setSortField] = useState('');
   const [sortDirection, setSortDirection] = useState('asc');
+  const [showNewExamModal, setShowNewExamModal] = useState(false);
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -29,6 +34,8 @@ const AdminDashboard = () => {
       setSortDirection('asc');
     }
   };
+
+  
 
   const filteredUsers = users
     .filter(user => 
@@ -86,6 +93,11 @@ const AdminDashboard = () => {
     }
   ];
 
+  const handleNewExamClick = () => {
+    setShowNewExamModal(true);
+    navigate('/exams/create');
+  };
+
   return (
     <div className="admin-dashboard" dir="rtl">
       <div className="glowing-background">
@@ -141,6 +153,11 @@ const AdminDashboard = () => {
             >
               📚 آزمون‌ها
             </button>
+
+            <button className="tab" onClick={handleNewExamClick}>
+            ➕ آزمون جدید 
+            </button>
+
           </div>
 
           {activeTab === 'users' ? (

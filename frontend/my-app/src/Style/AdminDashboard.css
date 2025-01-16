@@ -338,6 +338,31 @@
   color: #eab308;
 }
 
+.new-exam-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(to right, #6366f1, #3b82f6);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.new-exam-btn:hover {
+  background: linear-gradient(to right, #4f46e5, #2563eb);
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.btn-icon {
+  width: 20px;
+  height: 20px;
+}
+
 /* Responsive Design */
 @media screen and (max-width: 1024px) {
   .dashboard-header {
