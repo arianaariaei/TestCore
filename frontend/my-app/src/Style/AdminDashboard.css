@@ -363,6 +363,11 @@
   height: 20px;
 }
 
+.charts_title {
+  font-size: 1.5rem; 
+  color: #fff; 
+  margin-bottom: 20px; 
+}
 .charts_container{
   position: relative;
   z-index: 1;
@@ -377,6 +382,7 @@
   flex-direction: row;
   justify-content: space-between;
   text-align: center;
+  flex-wrap: wrap;
 }
 
 .percentage_chart{
@@ -384,7 +390,8 @@
   padding: 20px;
   background: rgba(255, 255, 255, 0.06);  
   border-radius: 20px;
-  width : 30%;
+  flex: 1; 
+  min-width: 300px; 
 }
 
 .count_chart{
@@ -392,7 +399,8 @@
   padding: 10px;
   background: rgba(255, 255, 255, 0.06);  
   border-radius: 20px;
-  width : 60%;
+  flex: 2; 
+  min-width: 400px;
 }
 
 /* Responsive Design */
