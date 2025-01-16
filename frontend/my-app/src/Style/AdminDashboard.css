@@ -248,8 +248,9 @@
 }
 
 .table-header {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
   background: rgba(255, 255, 255, 0.1);
   padding: 1rem;
   font-weight: 500;
@@ -279,8 +280,9 @@
 }
 
 .table-row {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
   padding: 1rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   transition: all 0.3s ease;

@@ -9,10 +9,10 @@ const AdminDashboard = ({ onLogout }) => {
 
   
   const [users] = useState([
-    { id: 1, username: 'user1', email: 'user1@example.com', university: 'University A', lastActive: '2024/01/15', examCount: 12 },
-    { id: 2, username: 'user2', email: 'user2@example.com', university: 'University B', lastActive: '2024/01/14', examCount: 8 },
-    { id: 3, username: 'user3', email: 'user3@example.com', university: 'University A', lastActive: '2024/01/13', examCount: 15 },
-    { id: 4, username: 'user4', email: 'user4@example.com', university: 'University B', lastActive: '2024/01/12', examCount: 6 },
+    { id: 1, username: 'user1', email: 'user1@example.com', university: 'University A', examCount: 12 },
+    { id: 2, username: 'user2', email: 'user2@example.com', university: 'University B', examCount: 8 },
+    { id: 3, username: 'user3', email: 'user3@example.com', university: 'University A', examCount: 15 },
+    { id: 4, username: 'user4', email: 'user4@example.com', university: 'University B', examCount: 6 },
   ]);
 
   const [exams] = useState([
@@ -217,10 +217,6 @@ const AdminDashboard = ({ onLogout }) => {
                   دانشگاه
                   <span className="sort-arrow">▼</span>
                 </div>
-                <div className="header-cell" onClick={() => handleSort('lastActive')}>
-                  آخرین فعالیت
-                  <span className="sort-arrow">▼</span>
-                </div>
                 <div className="header-cell">عملیات</div>
               </div>
               {filteredUsers.map(user => (
@@ -228,9 +224,7 @@ const AdminDashboard = ({ onLogout }) => {
                   <div className="cell">{user.username}</div>
                   <div className="cell">{user.email}</div>
                   <div className="cell">{user.university}</div>
-                  <div className="cell">{user.lastActive}</div>
                   <div className="cell actions">
-                    <button className="action-btn edit" title="ویرایش">✏️</button>
                     <button className="action-btn delete" title="حذف">🗑️</button>
                     <button className="action-btn view" title="مشاهده">👁️</button>
                   </div>
@@ -257,7 +251,6 @@ const AdminDashboard = ({ onLogout }) => {
                   <div className="cell">{exam.participants}</div>
                   <div className="cell">{exam.avgScore}</div>
                   <div className="cell actions">
-                    <button className="action-btn edit" title="ویرایش">✏️</button>
                     <button className="action-btn delete" title="حذف">🗑️</button>
                     <button className="action-btn view" title="مشاهده">👁️</button>
                   </div>
