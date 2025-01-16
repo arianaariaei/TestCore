@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import '../../style/ExamCreate.css';
+import { useNavigate } from 'react-router-dom';
 
 const GlowingBackground = () => (
   <div className="glowing-background">
@@ -10,6 +11,7 @@ const GlowingBackground = () => (
 );
 
 const ExamCreate = () => {
+  const navigate = useNavigate(); // useNavigate باید اینجا باشد
   const [examData, setExamData] = useState({
     title: '',
     subject: '',
@@ -74,6 +76,10 @@ const ExamCreate = () => {
     e.preventDefault();
     // اینجا می‌توانید کد مربوط به ذخیره آزمون را اضافه کنید
     console.log('آزمون جدید:', examData);
+  };
+
+  const handleCancel = () => {
+    navigate('/admin'); // هدایت به صفحه ادمین
   };
 
   return (
@@ -234,7 +240,7 @@ const ExamCreate = () => {
               <button type="submit" className="submit-btn">
                 ایجاد آزمون
               </button>
-              <button type="button" className="cancel-btn">
+              <button type="button" onClick={handleCancel} className="cancel-btn">
                 انصراف
               </button>
             </div>
