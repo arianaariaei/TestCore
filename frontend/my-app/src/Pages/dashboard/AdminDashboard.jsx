@@ -257,12 +257,13 @@ const AdminDashboard = () => {
         </div>
 
         <div className="charts_container">
-          <div className="percentage_chart">
-            <Pie data={pieData}/>
-          </div>
-          <div className="count_chart">
-            <Bar data={barData} />
-          </div>
+          <h2 className="charts_title"> نمودار ها 📊</h2>
+            <div className="percentage_chart">
+              <Pie data={pieData}/>
+            </div>
+            <div className="count_chart">
+              <Bar data={barData} />
+            </div>
         </div>
       </div>
     </div>
