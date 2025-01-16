@@ -10,7 +10,6 @@ class Exam(Base):
     title = Column(String(200), nullable=False)
     correct_answers = Column(Integer, nullable=False)
     wrong_answers = Column(Integer, nullable=False)
-    subject_id = Column(Integer, ForeignKey('subjects.subject_id'), nullable=False)
+    subject = Column(String(100), nullable=False)
 
-    subject = relationship("Subject", back_populates="exams")
     users = relationship("User", secondary="user_exams", back_populates="exams")

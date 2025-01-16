@@ -3,7 +3,7 @@ from pydantic import BaseModel, validator
 
 class ExamCreate(BaseModel):
     title: str
-    subject_id: int
+    subject: str
     correct_answers: int = 0
     wrong_answers: int = 0
 
