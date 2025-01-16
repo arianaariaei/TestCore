@@ -3,38 +3,54 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
+import psycopg2
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 load_dotenv()
 
-# Database configuration
+# Database configuration - Force lowercase for database name
 DB_USER = os.getenv("DB_USER", "postgres")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "admin")
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "5432")
-DB_NAME = os.getenv("DB_NAME", "TestCore_db")
-
-# Create initial connection to postgres database to create our app database
-default_engine = create_engine(f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/postgres')
+DB_NAME = os.getenv("DB_NAME", "testcore_db").lower()  # Force lowercase
 
 
-# Create the database if it doesn't exist
 def create_database():
+    """Create database using psycopg2"""
     try:
-        with default_engine.connect() as conn:
-            conn.execute(text("commit"))  # Close any existing transactions
-            conn.execute(text(f"CREATE DATABASE {DB_NAME}"))
+        # Connect to postgres database first
+        conn = psycopg2.connect(
+            user=DB_USER,
+            password=DB_PASSWORD,
+            host=DB_HOST,
+            port=DB_PORT,
+            database="postgres"
+        )
+        conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        cur = conn.cursor()
+
+        # Check if database exists
+        cur.execute(f"SELECT 1 FROM pg_catalog.pg_database WHERE datname = '{DB_NAME}'")
+        exists = cur.fetchone()
+
+        if not exists:
+            cur.execute(f'CREATE DATABASE {DB_NAME}')
+            print(f"Database {DB_NAME} created successfully")
+        else:
+            print(f"Database {DB_NAME} already exists")
+
+        cur.close()
+        conn.close()
+
     except Exception as e:
-        print(f"Database {DB_NAME} already exists or error occurred:", e)
-    finally:
-        default_engine.dispose()
+        print(f"Error in create_database: {e}")
+        raise e
 
-
-# Create the database
-create_database()
 
 # Now connect to our app database
 DATABASE_URL = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
-engine = create_engine(DATABASE_URL, echo=True)
+engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
@@ -47,11 +63,15 @@ def get_db():
         db.close()
 
 
-# Create all tables
 def init_db():
-    import models.user
-    import models.subject
-    import models.exam
-    import models.user_exam
-    Base.metadata.create_all(bind=engine)
+    """Initialize database tables"""
+    try:
+        # Create database first
+        create_database()
 
+        # Then create all tables
+        Base.metadata.create_all(bind=engine)
+        print("Tables created successfully")
+    except Exception as e:
+        print(f"Error initializing database: {e}")
+        raise e
