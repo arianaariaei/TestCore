@@ -363,6 +363,38 @@
   height: 20px;
 }
 
+.charts_container{
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 40px auto;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 2rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  text-align: center;
+}
+
+.percentage_chart{
+  margin: 25px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.06);  
+  border-radius: 20px;
+  width : 30%;
+}
+
+.count_chart{
+  margin: 25px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.06);  
+  border-radius: 20px;
+  width : 60%;
+}
+
 /* Responsive Design */
 @media screen and (max-width: 1024px) {
   .dashboard-header {

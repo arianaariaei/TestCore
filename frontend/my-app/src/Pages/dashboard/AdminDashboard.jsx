@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Pie, Bar } from 'react-chartjs-2'; // Import Bar chart
+import Chart from 'chart.js/auto';
 import '../../Style/AdminDashboard.css';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-
 
   const [users] = useState([
     { id: 1, username: 'user1', email: 'user1@example.com', university: 'University A', lastActive: '2024/01/15', examCount: 12 },
@@ -18,7 +19,39 @@ const AdminDashboard = () => {
     { id: 2, title: 'آزمون فیزیک', status: 'در حال انجام', participants: 32, avgScore: 78, date: '2024/01/14' },
     { id: 3, title: 'آزمون شیمی', status: 'تکمیل شده', participants: 38, avgScore: 92, date: '2024/01/13' },
     { id: 4, title: 'آزمون برنامه‌نویسی', status: 'در حال انجام', participants: 25, avgScore: 88, date: '2024/01/12' },
+    { id: 5, title: 'آزمون برنامه‌نویسی', status: 'در حال انجام', participants: 21, avgScore: 88, date: '2024/01/12' },
   ]);
+
+  const subjects = exams.map(exam => exam.title);
+  const subjectCounts = subjects.reduce((acc, subject) => {
+    acc[subject] = (acc[subject] || 0) + 1;
+    return acc;
+  }, {});
+
+  const pieData = {
+    labels: Object.keys(subjectCounts),
+    datasets: [
+      {
+        label: 'درصد آزمون',
+        data: Object.values(subjectCounts).map(count => (count / exams.length) * 100),
+        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+        hoverOffset: 4,
+      },
+    ],
+  };
+
+  const barData = {
+    labels: users.map(user => user.username), 
+    datasets: [
+      {
+        label: 'تعداد آزمون',
+        data: users.map(user => user.examCount), 
+        backgroundColor: 'rgba(3, 194, 252, 0.6)',
+        borderColor: 'rgba(3, 194, 252, 1)',
+        borderWidth: 1,
+      },
+    ],
+  };
 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('users');
@@ -34,8 +67,6 @@ const AdminDashboard = () => {
       setSortDirection('asc');
     }
   };
-
-  
 
   const filteredUsers = users
     .filter(user => 
@@ -155,7 +186,7 @@ const AdminDashboard = () => {
             </button>
 
             <button className="tab" onClick={handleNewExamClick}>
-            ➕ آزمون جدید 
+              ➕ آزمون جدید 
             </button>
 
           </div>
@@ -223,6 +254,15 @@ const AdminDashboard = () => {
               ))}
             </div>
           )}
+        </div>
+
+        <div className="charts_container">
+          <div className="percentage_chart">
+            <Pie data={pieData}/>
+          </div>
+          <div className="count_chart">
+            <Bar data={barData} />
+          </div>
         </div>
       </div>
     </div>
