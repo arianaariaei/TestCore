@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Pie, Bar } from 'react-chartjs-2'; // Import Bar chart
+import { Pie, Bar } from 'react-chartjs-2';
 import Chart from 'chart.js/auto';
 import '../../Style/AdminDashboard.css';
 
-const AdminDashboard = () => {
+const AdminDashboard = ({ onLogout }) => {
   const navigate = useNavigate();
 
+  
   const [users] = useState([
     { id: 1, username: 'user1', email: 'user1@example.com', university: 'University A', lastActive: '2024/01/15', examCount: 12 },
     { id: 2, username: 'user2', email: 'user2@example.com', university: 'University B', lastActive: '2024/01/14', examCount: 8 },
@@ -129,8 +130,18 @@ const AdminDashboard = () => {
     navigate('/exams/create');
   };
 
+  const handleLogout = () => {
+    onLogout(); 
+    navigate('/login'); 
+  };
+
   return (
     <div className="admin-dashboard" dir="rtl">
+      <div className="logout_conatiner">
+        <button className="logout-button" onClick={handleLogout}>
+              خروج
+        </button>
+      </div>
       <div className="glowing-background">
         <div className="glow-ball-1"></div>
         <div className="glow-ball-2"></div>
