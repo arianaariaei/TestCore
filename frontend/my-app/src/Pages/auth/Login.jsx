@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import '../../style/Login.css';
 import { useNavigate } from 'react-router-dom';
+import logo from "../../assets/exam-system-logo.svg";
 
 const FloatingParticle = ({ delay }) => {
   return (
@@ -119,9 +120,7 @@ const Login = ({ onRegisterClick, onLoginSuccess }) => {
           <div className="card-body">
             <div className="header">
               <div className="logo">
-                <svg xmlns="http://www.w3.org/2000/svg" className="logo-icon" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zm0 12L2 9l10 5 10-5v6l-10 5L2 15v-6z" />
-                </svg>
+                  <img src={logo} alt="" />
               </div>
 
               <h1 className="title">ورود به سامانه</h1>
