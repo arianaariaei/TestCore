@@ -7,7 +7,7 @@ import '../../Style/AdminDashboard.css';
 const AdminDashboard = ({ onLogout }) => {
   const navigate = useNavigate();
 
-  
+
   const [users] = useState([
     { id: 1, username: 'user1', email: 'user1@example.com', university: 'University A', examCount: 12 },
     { id: 2, username: 'user2', email: 'user2@example.com', university: 'University B', examCount: 8 },
@@ -15,12 +15,13 @@ const AdminDashboard = ({ onLogout }) => {
     { id: 4, username: 'user4', email: 'user4@example.com', university: 'University B', examCount: 6 },
   ]);
 
+  // تغییر ساختار داده‌های آزمون
   const [exams] = useState([
-    { id: 1, title: 'آزمون ریاضی ۱', status: 'تکمیل شده', participants: 45, avgScore: 85, date: '2024/01/15' },
-    { id: 2, title: 'آزمون فیزیک', status: 'در حال انجام', participants: 32, avgScore: 78, date: '2024/01/14' },
-    { id: 3, title: 'آزمون شیمی', status: 'تکمیل شده', participants: 38, avgScore: 92, date: '2024/01/13' },
-    { id: 4, title: 'آزمون برنامه‌نویسی', status: 'در حال انجام', participants: 25, avgScore: 88, date: '2024/01/12' },
-    { id: 5, title: 'آزمون برنامه‌نویسی', status: 'در حال انجام', participants: 21, avgScore: 88, date: '2024/01/12' },
+    { id: 1, title: 'آزمون ریاضی ۱', user: 'علی محمدی', score: 85, date: '2024/01/15' },
+    { id: 2, title: 'آزمون فیزیک', user: 'سارا احمدی', score: 78, date: '2024/01/14' },
+    { id: 3, title: 'آزمون شیمی', user: 'رضا کریمی', score: 92, date: '2024/01/13' },
+    { id: 4, title: 'آزمون برنامه‌نویسی', user: 'مریم حسینی', score: 88, date: '2024/01/12' },
+    { id: 5, title: 'آزمون برنامه‌نویسی', user: 'حسین علوی', score: 88, date: '2024/01/12' },
   ]);
 
   const subjects = exams.map(exam => exam.title);
@@ -87,7 +88,7 @@ const AdminDashboard = ({ onLogout }) => {
   const filteredExams = exams
     .filter(exam => 
       exam.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      exam.status.toLowerCase().includes(searchQuery.toLowerCase())
+      exam.user.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) => {
       if (!sortField) return 0;
@@ -113,14 +114,14 @@ const AdminDashboard = ({ onLogout }) => {
     },
     {
       icon: "⏳",
-      title: "در حال انجام",
-      value: exams.filter(exam => exam.status === 'در حال انجام').length,
+      title: "میانگین نمرات",
+      value: Math.round(exams.reduce((acc, exam) => acc + exam.score, 0) / exams.length),
       gradient: "gradient-orange"
     },
     {
       icon: "✅",
-      title: "تکمیل شده",
-      value: exams.filter(exam => exam.status === 'تکمیل شده').length,
+      title: "بالاترین نمره",
+      value: Math.max(...exams.map(exam => exam.score)),
       gradient: "gradient-green"
     }
   ];
@@ -139,7 +140,7 @@ const AdminDashboard = ({ onLogout }) => {
     <div className="admin-dashboard" dir="rtl">
       <div className="logout_conatiner">
         <button className="logout-button" onClick={handleLogout}>
-              خروج
+          خروج
         </button>
       </div>
       <div className="glowing-background">
@@ -199,7 +200,6 @@ const AdminDashboard = ({ onLogout }) => {
             <button className="tab" onClick={handleNewExamClick}>
               ➕ آزمون جدید 
             </button>
-
           </div>
 
           {activeTab === 'users' ? (
@@ -235,23 +235,16 @@ const AdminDashboard = ({ onLogout }) => {
             <div className="data-table">
               <div className="table-header">
                 <div className="header-cell" onClick={() => handleSort('title')}>عنوان آزمون</div>
-                <div className="header-cell" onClick={() => handleSort('status')}>وضعیت</div>
-                <div className="header-cell" onClick={() => handleSort('participants')}>تعداد شرکت‌کنندگان</div>
-                <div className="header-cell" onClick={() => handleSort('avgScore')}>میانگین نمره</div>
+                <div className="header-cell" onClick={() => handleSort('user')}>کاربر</div>
+                <div className="header-cell" onClick={() => handleSort('score')}>نمره</div>
                 <div className="header-cell">عملیات</div>
               </div>
               {filteredExams.map(exam => (
                 <div key={exam.id} className="table-row">
                   <div className="cell">{exam.title}</div>
-                  <div className="cell">
-                    <span className={`status-badge ${exam.status === 'تکمیل شده' ? 'completed' : 'ongoing'}`}>
-                      {exam.status}
-                    </span>
-                  </div>
-                  <div className="cell">{exam.participants}</div>
-                  <div className="cell">{exam.avgScore}</div>
+                  <div className="cell">{exam.user}</div>
+                  <div className="cell">{exam.score}</div>
                   <div className="cell actions">
-                    <button className="action-btn delete" title="حذف">🗑️</button>
                     <button className="action-btn view" title="مشاهده">👁️</button>
                   </div>
                 </div>
@@ -262,12 +255,12 @@ const AdminDashboard = ({ onLogout }) => {
 
         <div className="charts_container">
           <h2 className="charts_title"> نمودار ها 📊</h2>
-            <div className="percentage_chart">
-              <Pie data={pieData}/>
-            </div>
-            <div className="count_chart">
-              <Bar data={barData} />
-            </div>
+          <div className="percentage_chart">
+            <Pie data={pieData}/>
+          </div>
+          <div className="count_chart">
+            <Bar data={barData} />
+          </div>
         </div>
       </div>
     </div>
