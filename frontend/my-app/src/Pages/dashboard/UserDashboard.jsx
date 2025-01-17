@@ -172,11 +172,6 @@ const UserDashboard = ({ onLogout }) => {
   });
   const [showNewExamModal, setShowNewExamModal] = useState(false);
 
-
-  const handleLogout = () => {
-    onLogout()
-    navigate('/login'); 
-  };
    const handleNewExamClick = () => {
     setShowNewExamModal(true);
     navigate('/exams/create');
@@ -187,7 +182,7 @@ const UserDashboard = ({ onLogout }) => {
     <div className="dashboard-wrapper">
       <div className="dashboard-container">
         <div className="logout_conatiner">
-            <button className="logout-button" onClick={handleLogout}>
+            <button className="logout-button" onClick={onLogout}>
               خروج
             </button>
         </div>  

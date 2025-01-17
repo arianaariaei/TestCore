@@ -125,15 +125,10 @@ const AdminDashboard = ({ onLogout }) => {
     }
   ];
 
-  const handleLogout = () => {
-    onLogout(); 
-    navigate('/login'); 
-  };
-
   return (
     <div className="admin-dashboard" dir="rtl">
       <div className="logout_conatiner">
-        <button className="logout-button" onClick={handleLogout}>
+        <button className="logout-button" onClick={onLogout}>
           خروج
         </button>
       </div>
