@@ -59,7 +59,6 @@ const AdminDashboard = ({ onLogout }) => {
   const [activeTab, setActiveTab] = useState('users');
   const [sortField, setSortField] = useState('');
   const [sortDirection, setSortDirection] = useState('asc');
-  const [showNewExamModal, setShowNewExamModal] = useState(false);
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -126,11 +125,6 @@ const AdminDashboard = ({ onLogout }) => {
     }
   ];
 
-  const handleNewExamClick = () => {
-    setShowNewExamModal(true);
-    navigate('/exams/create');
-  };
-
   const handleLogout = () => {
     onLogout(); 
     navigate('/login'); 
@@ -195,10 +189,6 @@ const AdminDashboard = ({ onLogout }) => {
               onClick={() => setActiveTab('exams')}
             >
               📚 آزمون‌ها
-            </button>
-
-            <button className="tab" onClick={handleNewExamClick}>
-              ➕ آزمون جدید 
             </button>
           </div>
 

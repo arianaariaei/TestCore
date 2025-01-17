@@ -30,6 +30,7 @@ const ExamCard = ({ exam }) => {
     setIsExpanded(!isExpanded);
   };
 
+ 
   return (
     <div className={`exam-card ${isExpanded ? 'expanded' : ''}`}>
       <div className="exam-header">
@@ -121,28 +122,6 @@ const UserDashboard = ({ onLogout }) => {
     {
       icon: (
         <svg className="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <polyline points="22 4 12 14.01 9 11.01" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      ),
-      title: "آزمون‌های تکمیل شده",
-      value: "18",
-      gradient: "gradient-green"
-    },
-    {
-      icon: (
-        <svg className="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <circle cx="12" cy="12" r="10" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <polyline points="12 6 12 12 16 14" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      ),
-      title: "در حال انجام",
-      value: "6",
-      gradient: "gradient-orange"
-    },
-    {
-      icon: (
-        <svg className="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path d="M12 15l-2 5l9-9l-9-9l2 5l-9 4l9 4z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       ),
@@ -155,7 +134,6 @@ const UserDashboard = ({ onLogout }) => {
   const exams = [
     {
       title: "آزمون ریاضی ۱",
-      status: "تکمیل شده",
       totalQuestions: 30,
       correctAnswers: 25,
       incorrectAnswers: 5,
@@ -164,7 +142,6 @@ const UserDashboard = ({ onLogout }) => {
     },
     {
       title: "آزمون فیزیک",
-      status: "در حال انجام",
       totalQuestions: 40,
       correctAnswers: 15,
       incorrectAnswers: 8,
@@ -173,7 +150,6 @@ const UserDashboard = ({ onLogout }) => {
     },
     {
       title: "آزمون شیمی",
-      status: "تکمیل شده",
       totalQuestions: 35,
       correctAnswers: 28,
       incorrectAnswers: 7,
@@ -182,7 +158,6 @@ const UserDashboard = ({ onLogout }) => {
     },
     {
       title: "آزمون زبان",
-      status: "در حال انجام",
       totalQuestions: 50,
       correctAnswers: 20,
       incorrectAnswers: 10,
@@ -193,15 +168,20 @@ const UserDashboard = ({ onLogout }) => {
 
   const filteredExams = exams.filter(exam => {
     if (activeTab === 'all') return true;
-    if (activeTab === 'completed') return exam.status === 'تکمیل شده';
-    if (activeTab === 'ongoing') return exam.status === 'در حال انجام';
     return true;
   });
+  const [showNewExamModal, setShowNewExamModal] = useState(false);
+
 
   const handleLogout = () => {
     onLogout()
     navigate('/login'); 
   };
+   const handleNewExamClick = () => {
+    setShowNewExamModal(true);
+    navigate('/exams/create');
+  };
+
 
   return (
     <div className="dashboard-wrapper">
@@ -237,18 +217,10 @@ const UserDashboard = ({ onLogout }) => {
             >
               همه آزمون‌ها
             </button>
-            <button
-              className={`tab-btn ${activeTab === 'completed' ? 'active' : ''}`}
-              onClick={() => setActiveTab('completed')}
-            >
-              تکمیل شده
+            <button className="tab" onClick={handleNewExamClick}>
+              ➕ آزمون جدید 
             </button>
-            <button
-              className={`tab-btn ${activeTab === 'ongoing' ? 'active' : ''}`}
-              onClick={() => setActiveTab('ongoing')}
-            >
-              در حال انجام
-            </button>
+            
           </div>
 
           {/* Exams Grid */}

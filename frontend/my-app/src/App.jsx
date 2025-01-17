@@ -94,7 +94,7 @@ function App() {
           <Route 
             path="/exams/create"
             element={
-              isAuthenticated && userData.role === 'admin' ? (
+              isAuthenticated ? (
                 <ExamCreate />
               ) : (
                 <Navigate to="/login" />
