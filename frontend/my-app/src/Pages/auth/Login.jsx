@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import '../../style/Login.css';
 import { useNavigate } from 'react-router-dom';
 import logo from "../../assets/exam-system-logo.svg";
+import { authService } from "../../api/services";
+
 
 const FloatingParticle = ({ delay }) => {
   return (
@@ -59,54 +61,139 @@ const Login = ({ onRegisterClick, onLoginSuccess }) => {
     setError('');
   };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError('');
-
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      if (formData.username.trim() === '' || formData.password.trim() === '') {
-        throw new Error('لطفاً نام کاربری و رمز عبور را وارد کنید');
-      }
-
-
-      if (formData.username === 'admin' && formData.password === '1234') {
-        // Mock successful admin login response
-        const adminData = {
-        username: formData.username,
-        role: 'admin'
-        };
-
-        // Call onLoginSuccess with admin data
-        if (onLoginSuccess) {
-          onLoginSuccess(adminData); 
-        }
-        return;
-      }
-
-      // Mock successful login response
-      const userData = {
-        username: formData.username,
-        fullName: 'کاربر نمونه',
-        email: 'user@example.com',
-        university: 'دانشگاه نمونه',
-        role: 'دانشجو'
-      };
-
-      // Call onLoginSuccess with user data
-      if (onLoginSuccess) {
-        onLoginSuccess(userData);
-      }
-
-      console.log('ورود موفقیت‌آمیز', userData);
+      const response = await axios.post('http://localhost:8000/login', {
+        email,
+        password,
+      });
+      const { access_token, ...user } = response.data; // Assuming the response has this structure
+      
+      localStorage.setItem('token', access_token); // Store token in local storage or state
+      onLoginSuccess(user); // Pass user data to parent
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'خطای نامشخص در ورود');  
-    } finally {
-      setIsLoading(false);
+      setError(err.response?.data?.detail || 'Login failed');
     }
   };
+
+  // const handleSubmit = async (e) => {
+    // e.preventDefault();
+    // setIsLoading(true);
+    // setError('');
+
+    // try {
+
+    //     await new Promise(resolve => setTimeout(resolve, 1500));
+
+    //     if (formData.username.trim() === '' || formData.password.trim() === '') {
+    //       throw new Error('لطفاً ایمیل و رمز عبور را وارد کنید');
+    //     }
+    //           // Keep your existing admin check
+    //           if (formData.username === 'admin' && formData.password === '1234') {
+    //               const adminData = {
+    //                   username: formData.username,
+    //                   role: 'admin'
+    //               };
+    //               if (onLoginSuccess) {
+    //                   onLoginSuccess(adminData); 
+    //               }
+    //               return;
+    //           }
+      
+    //           // Add API call here
+    //           try {
+    //               const loginCredentials = {
+    //                   email: formData.email,
+    //                   password: formData.password
+    //               };
+    //               
+    //               // Try API login
+    //               const response = await authService.login(loginCredentials);
+    //               console.log('API Response:', response);
+      
+    //               // If API call succeeds, create userData
+    //               const userData = {
+    //                   email: formData.email,
+    //                   role: response.is_admin ? 'admin' : 'دانشجو'
+    //               };
+      
+    //               if (onLoginSuccess) {
+    //                   onLoginSuccess(userData);
+    //               }
+      
+    //           } catch (apiError) {
+    //               console.error('API Login failed:', apiError);
+    //               
+    //               // Fallback to your existing mock login
+    //               const userData = {
+    //                   username: formData.username,
+    //                   fullName: 'کاربر نمونه',
+    //                   email: 'user@example.com',
+    //                   university: 'دانشگاه نمونه',
+    //                   role: 'دانشجو'
+    //               };
+      
+    //               if (onLoginSuccess) {
+    //                   onLoginSuccess(userData);
+    //               }
+    //           }
+      
+    //       } catch (err) {
+    //           setError(err instanceof Error ? err.message : 'خطای نامشخص در ورود');  
+    //       } finally {
+    //           setIsLoading(false);
+    //       }
+
+    
+
+
+
+
+    // try {
+    //   await new Promise(resolve => setTimeout(resolve, 1500));
+
+    //   if (formData.username.trim() === '' || formData.password.trim() === '') {
+    //     throw new Error('لطفاً نام کاربری و رمز عبور را وارد کنید');
+    //   }
+
+
+    //   if (formData.username === 'admin' && formData.password === '1234') {
+    //     // Mock successful admin login response
+    //     const adminData = {
+    //     username: formData.username,
+    //     role: 'admin'
+    //     };
+
+    //     // Call onLoginSuccess with admin data
+    //     if (onLoginSuccess) {
+    //       onLoginSuccess(adminData); 
+    //     }
+    //     return;
+    //   }
+
+    //   // Mock successful login response
+    //   const userData = {
+    //     username: formData.username,
+    //     fullName: 'کاربر نمونه',
+    //     email: 'user@example.com',
+    //     university: 'دانشگاه نمونه',
+    //     role: 'دانشجو'
+    //   };
+
+    //   // Call onLoginSuccess with user data
+    //   if (onLoginSuccess) {
+    //     onLoginSuccess(userData);
+    //   }
+
+    //   console.log('ورود موفقیت‌آمیز', userData);
+    // } catch (err) {
+    //   setError(err instanceof Error ? err.message : 'خطای نامشخص در ورود');  
+    // } finally {
+    //   setIsLoading(false);
+    // }
+  // };
 
   return (
     <div className="login-page" dir="rtl">
@@ -148,7 +235,7 @@ const Login = ({ onRegisterClick, onLoginSuccess }) => {
                   onChange={handleInputChange}
                   required
                   disabled={isLoading}
-                  placeholder="نام کاربری خود را وارد کنید"
+                  placeholder="ایمیل خود را وارد کنید"
                 />
 
                 <InputField
@@ -200,6 +287,7 @@ const Login = ({ onRegisterClick, onLoginSuccess }) => {
       </div>
     </div>
   );
+  
 };
 
 export default Login;

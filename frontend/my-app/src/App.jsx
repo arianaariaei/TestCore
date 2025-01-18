@@ -16,16 +16,64 @@ function App() {
   const handleToggleView = () => {
     setIsLoginView(!isLoginView);
   };
-
   const handleLoginSuccess = (user) => {
     setUserData(user);
+    // fix this part
     setIsAuthenticated(true);
+
   };
+  // useEffect(() => {
+  //   // Check if there's a valid access token
+  //   const token = localStorage.getItem('access_token');
+  //   if (token) {
+  //     verifyToken(token);
+  //   }
+  // }, []);
+
+  // const verifyToken = async (token) => {
+  //   try {
+  //     const response = await fetch('', {
+  //       method: 'GET',
+  //       headers: {
+  //         'Authorization': `Bearer ${token}`
+  //       }
+  //     });
+
+  //     if (response.ok) {
+  //       const user = await response.json();
+  //       setUserData(user);
+  //       setIsAuthenticated(true);
+  //     } else {
+  //       // Clear invalid token
+  //       localStorage.removeItem('access_token');
+  //       setIsAuthenticated(false);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error verifying token:', error);
+  //     localStorage.removeItem('access_token');
+  //     setIsAuthenticated(false);
+  //   }
+  // };
+
+  // const handleToggleView = () => {
+  //   setIsLoginView(!isLoginView);
+  // };
+
+  // const handleLoginSuccess = async (user) => {
+  //   const { access_token } = user;
+
+  //   // Store the token for future API requests
+  //   localStorage.setItem('access_token', access_token);
+
+  //   // Verify the token before setting user data
+  //   await verifyToken(access_token);
+  // };
 
   const handleLogout = () => {
     setUserData(null);
     setIsAuthenticated(false);
   };
+
 
   return (
     <Router>

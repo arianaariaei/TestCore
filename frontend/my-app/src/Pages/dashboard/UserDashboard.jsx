@@ -107,6 +107,29 @@ const ExamCard = ({ exam }) => {
 const UserDashboard = ({ onLogout }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    
+    const verifyToken = async () => {
+      try {
+        const response = await axios.get('http://localhost:8000/some-protected-route', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        // Token is valid, you can also set user data here if needed
+      } catch (error) {
+        console.error('Token is invalid or expired', error);
+        onLogout(); // Call logout function if token is invalid
+        navigate('/login'); // Redirect to login
+      }
+    };
+
+    if (token) {
+      verifyToken();
+    } else {
+      navigate('/login'); // Redirect if no token
+    }
+  }, [onLogout, navigate]);
   
   const stats = [
     {

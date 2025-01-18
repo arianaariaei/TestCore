@@ -9,9 +9,18 @@ from models.exam import Exam
 from models.user import User
 from models.user_exam import user_exams
 from schemas import UserCreate, LoginRequest, ExamCreate, ExamUpdate
+from fastapi.middleware.cors import CORSMiddleware
 
 init_db()
 app = FastAPI(title="Test Management System")
+
+app.add_middleware(CORSMiddleware,
+                   allow_origins=["http://localhost:5173"],
+                   allow_credentials=True,
+                   allow_methods=["*"],
+                   allow_headers=["*"],
+)
+
 
 # JWT and Auth configurations
 SECRET_KEY = "testcore_secret_key_very_mysterious"
@@ -69,7 +78,7 @@ async def login(login_data: LoginRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     access_token = create_access_token(data={"sub": user.email})
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"User": user, "access_token": access_token, "token_type": "bearer"}
 
 
 # 2. Exam Management APIs
