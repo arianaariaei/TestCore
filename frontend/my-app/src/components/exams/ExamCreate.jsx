@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import '../../style/ExamCreate.css';
 import { useNavigate } from 'react-router-dom';
+import { examService } from "../../api/services";
 
 const GlowingBackground = () => (
   <div className="glowing-background">
@@ -27,8 +28,27 @@ const ExamCreate = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    try {
+        // Format the data to match API expectations
+        const formattedData = {
+            title: examData.title,
+            subject: examData.subject,
+            correct_answers: parseInt(examData.correctAnswer),
+            wrong_answers: parseInt(examData.wrongAnswer)
+        };
+
+        await examService.createExam(formattedData);
+
+        // If successful, navigate to dashboard
+        navigate('/dashboard');
+    } catch (error) {
+        console.error('Error creating exam:', error);
+        // You might want to show an error message to the user here
+    }
+
     console.log('آزمون جدید:', examData);
     navigate('/dashboard');
   };

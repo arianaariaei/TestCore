@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import '../../style/Register.css';
 import { useNavigate } from 'react-router-dom';
+import { authService } from "../../api/services";
+
 
 const FloatingParticle = ({ delay }) => (
   <div
@@ -58,7 +60,7 @@ const Register = ({ onLoginClick }) => {
 
   const validateForm = () => {
     if (!formData.username.trim()) {
-      setError('لطفاً نام کاربری را وارد کنید');
+      setError('لطفاً نام خود را وارد کنید');
       return false;
     }
 
