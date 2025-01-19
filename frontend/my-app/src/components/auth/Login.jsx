@@ -3,6 +3,7 @@ import '../../style/Login.css';
 import { useNavigate } from 'react-router-dom';
 import logo from "../../assets/exam-system-logo.svg";
 
+
 const FloatingParticle = ({ delay }) => {
   return (
     <div 
@@ -47,7 +48,7 @@ const Login = ({ onRegisterClick, onLoginSuccess }) => {
   const [error, setError] = useState('');
 
   const handleToggleView = () => {
-    navigate('/register'); // هدایت به صفحه ثبت‌نام
+    navigate('/register'); 
   };
 
   const handleInputChange = (e) => {
