@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './Pages/auth/Login';
-import Register from './Pages/auth/Register';
-import UserDashboard from './Pages/dashboard/UserDashboard';
-import AdminDashboard from './Pages/dashboard/AdminDashboard';
-import ExamCreate from './Pages/exams/ExamCreate';
+import Login from './components/auth/Login';
+import Register from './components/auth/Register';
+import UserDashboard from './components/dashboard/UserDashboard';
+import AdminDashboard from './components/dashboard/AdminDashboard';
+import ExamCreate from './components/exams/ExamCreate';
 
 import './App.css';
 
