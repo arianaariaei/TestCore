@@ -1,64 +1,115 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Pie, Bar } from 'react-chartjs-2';
-import Chart from 'chart.js/auto';
+import { examService } from '../../api/services';
 import '../../Style/AdminDashboard.css';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+
 
 const AdminDashboard = ({ onLogout }) => {
   const navigate = useNavigate();
 
+  const [users, setUsers] = useState([]);
+  const [exams, setExams] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(true);
+  const [loadingExams, setLoadingExams] = useState(true);
+  const [error, setError] = useState(null);
+  
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const userData = await examService.getAllUsers();
+        setUsers(userData);
+      } catch (err) {
+        console.error('Error fetching users:', err);
+        setError('Failed to load users');
+      } finally {
+        setLoadingUsers(false);
+      }
+    };
 
-  const [users] = useState([
-    { id: 1, username: 'user1', email: 'user1@example.com', university: 'University A', examCount: 12 },
-    { id: 2, username: 'user2', email: 'user2@example.com', university: 'University B', examCount: 8 },
-    { id: 3, username: 'user3', email: 'user3@example.com', university: 'University A', examCount: 15 },
-    { id: 4, username: 'user4', email: 'user4@example.com', university: 'University B', examCount: 6 },
-  ]);
+    const fetchExams = async () => {
+      try {
+        const examData = await examService.getAllExams();
+        setExams(examData);
+      } catch (err) {
+        console.error('Error fetching exams:', err);
+        setError('Failed to load exams');
+      } finally {
+        setLoadingExams(false);
+      }
+    };
 
-  // تغییر ساختار داده‌های آزمون
-  const [exams] = useState([
-    { id: 1, title: 'آزمون ریاضی ۱', user: 'علی محمدی', score: 85, date: '2024/01/15' },
-    { id: 2, title: 'آزمون فیزیک', user: 'سارا احمدی', score: 78, date: '2024/01/14' },
-    { id: 3, title: 'آزمون شیمی', user: 'رضا کریمی', score: 92, date: '2024/01/13' },
-    { id: 4, title: 'آزمون برنامه‌نویسی', user: 'مریم حسینی', score: 88, date: '2024/01/12' },
-    { id: 5, title: 'آزمون برنامه‌نویسی', user: 'حسین علوی', score: 88, date: '2024/01/12' },
-  ]);
+    fetchUsers();
+    fetchExams();
+  }, []);
 
-  const subjects = exams.map(exam => exam.title);
-  const subjectCounts = subjects.reduce((acc, subject) => {
-    acc[subject] = (acc[subject] || 0) + 1;
-    return acc;
-  }, {});
+  // Prepare data for pie chart
+// function getRandomColor() {
+//     const randomColor = Math.floor(Math.random()*16777215).toString(16);
+//     return `#${randomColor}`;
+// }
 
-  const pieData = {
-    labels: Object.keys(subjectCounts),
-    datasets: [
-      {
-        label: 'درصد آزمون',
-        data: Object.values(subjectCounts).map(count => (count / exams.length) * 100),
-        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
-        hoverOffset: 4,
-      },
-    ],
-  };
+// // Generate background colors based on the number of subjects
+// const subjects = exams.map(exam => exam.subject);
+// const subjectCounts = subjects.reduce((acc, subject) => {
+//   acc[subject] = (acc[subject] || 0) + 1;
+//   return acc;
+// }, {});
 
-  const barData = {
-    labels: users.map(user => user.username), 
-    datasets: [
-      {
-        label: 'تعداد آزمون',
-        data: users.map(user => user.examCount), 
-        backgroundColor: 'rgba(3, 194, 252, 0.6)',
-        borderColor: 'rgba(3, 194, 252, 1)',
-        borderWidth: 1,
-      },
-    ],
-  };
+// const totalExams = exams.length; // Ensure this is defined
+// const backgroundColors = Array.from({ length: Object.keys(subjectCounts).length }, getRandomColor);
 
+// const pieData = {
+//   labels: Object.keys(subjectCounts),
+//   datasets: [
+//     {
+//       label: 'درصد آزمون',
+//       data: totalExams === 0 ? [] : Object.values(subjectCounts).map(count => (count / totalExams) * 100),
+//       backgroundColor: backgroundColors,
+//       hoverOffset: 4,
+//     },
+//   ],
+// };
+
+//   const pieOptions = {
+//     responsive: true,
+//     maintainAspectRatio: false,
+//   };
+
+  // const userExamCounts = users.map(user => {
+  //   const userExams = exams.filter(exam => exam.user.user_id === user.user_id);
+  //   return {
+  //     userId: user.user_id,
+  //     name: user.name,
+  //     examCount: userExams.length,
+  //   };
+  // });
+
+  // const barData = {
+  //   labels: userExamCounts.map(user => user.name),
+  //   datasets: [
+  //     {
+  //       label: 'تعداد آزمون',
+  //       data: userExamCounts.map(user => user.examCount),
+  //       backgroundColor: 'rgba(3, 194, 252, 0.6)',
+  //       borderColor: 'rgba(3, 194, 252, 1)',
+  //       borderWidth: 1,
+  //     },
+  //   ],
+  // };
+  
+  // const barOptions = {
+  //   responsive: true,
+  //   maintainAspectRatio: false,
+  // };
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('users');
   const [sortField, setSortField] = useState('');
-  const [sortDirection, setSortDirection] = useState('asc');
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedExam, setSelectedExam] = useState(null);
+  const [sortDirection, setSortDirection] = useState('asc'); 
+
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -71,9 +122,8 @@ const AdminDashboard = ({ onLogout }) => {
 
   const filteredUsers = users
     .filter(user => 
-      user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.university.toLowerCase().includes(searchQuery.toLowerCase())
+      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) => {
       if (!sortField) return 0;
@@ -86,8 +136,7 @@ const AdminDashboard = ({ onLogout }) => {
 
   const filteredExams = exams
     .filter(exam => 
-      exam.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      exam.user.toLowerCase().includes(searchQuery.toLowerCase())
+      exam.title.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) => {
       if (!sortField) return 0;
@@ -114,13 +163,13 @@ const AdminDashboard = ({ onLogout }) => {
     {
       icon: "⏳",
       title: "میانگین نمرات",
-      value: Math.round(exams.reduce((acc, exam) => acc + exam.score, 0) / exams.length),
+      value: exams.length ? Math.round(exams.reduce((acc, exam) => acc + exam.correct_answers / (exam.correct_answers + exam.wrong_answers) * 100, 0) / exams.length) : 0,
       gradient: "gradient-orange"
     },
     {
       icon: "✅",
       title: "بالاترین نمره",
-      value: Math.max(...exams.map(exam => exam.score)),
+      value: exams.length ? Math.max(...exams.map(exam => exam.correct_answers / (exam.correct_answers + exam.wrong_answers) * 100)) : 0,
       gradient: "gradient-green"
     }
   ];
@@ -187,31 +236,35 @@ const AdminDashboard = ({ onLogout }) => {
             </button>
           </div>
 
-          {activeTab === 'users' ? (
+          <div className="content-section">
+          {loadingUsers || loadingExams ? (
+            <p>در حال بارگذاری...</p>
+          ) : error ? (
+            <p>{error}</p>
+          ) : activeTab === 'users' ? (
             <div className="data-table">
               <div className="table-header">
-                <div className="header-cell" onClick={() => handleSort('username')}>
-                  نام کاربری
-                  <span className="sort-arrow">▼</span>
-                </div>
-                <div className="header-cell" onClick={() => handleSort('email')}>
-                  ایمیل
-                  <span className="sort-arrow">▼</span>
-                </div>
-                <div className="header-cell" onClick={() => handleSort('university')}>
-                  دانشگاه
-                  <span className="sort-arrow">▼</span>
-                </div>
+                <div className="header-cell">نام</div>
+                <div className="header-cell">ایمیل</div>
+                <div className="header-cell">دانشگاه</div>
                 <div className="header-cell">عملیات</div>
               </div>
-              {filteredUsers.map(user => (
+              {users.map(user => (
                 <div key={user.id} className="table-row">
-                  <div className="cell">{user.username}</div>
+                  <div className="cell">{user.name}</div>
                   <div className="cell">{user.email}</div>
                   <div className="cell">{user.university}</div>
                   <div className="cell actions">
-                    <button className="action-btn delete" title="حذف">🗑️</button>
-                    <button className="action-btn view" title="مشاهده">👁️</button>
+                    <details>
+                      <summary className="action-btn view" title="مشاهده">👁️</summary>
+                      <div className="details-modal">
+                        <h2>جزئیات کاربر</h2>
+                        <p><strong>شناسه:</strong> {user.user_id}</p>
+                        <p><strong>نام:</strong> {user.name}</p>
+                        <p><strong>ایمیل:</strong> {user.email}</p>
+                        <p><strong>دانشگاه:</strong> {user.university}</p>
+                      </div>
+                    </details>
                   </div>
                 </div>
               ))}
@@ -219,32 +272,76 @@ const AdminDashboard = ({ onLogout }) => {
           ) : (
             <div className="data-table">
               <div className="table-header">
-                <div className="header-cell" onClick={() => handleSort('title')}>عنوان آزمون</div>
-                <div className="header-cell" onClick={() => handleSort('user')}>کاربر</div>
-                <div className="header-cell" onClick={() => handleSort('score')}>نمره</div>
+                <div className="header-cell">عنوان آزمون</div>
+                <div className="header-cell">کاربر</div>
+                <div className="header-cell">نمره</div>
                 <div className="header-cell">عملیات</div>
               </div>
-              {filteredExams.map(exam => (
-                <div key={exam.id} className="table-row">
+              {exams.map(exam => (
+                <div key={exam.exam_id} className="table-row">
                   <div className="cell">{exam.title}</div>
-                  <div className="cell">{exam.user}</div>
-                  <div className="cell">{exam.score}</div>
+                  <div className="cell">{exam.user.name}</div>
+                  <div className="cell">{(exam.correct_answers / (exam.correct_answers + exam.wrong_answers) * 100).toFixed(2)}%</div>
                   <div className="cell actions">
-                    <button className="action-btn view" title="مشاهده">👁️</button>
+                    <details>
+                      <summary className="action-btn view" title="مشاهده">👁️</summary>
+                      <div className="details-modal">
+                        <h2>جزئیات آزمون</h2>
+                        <p><strong>شناسه:</strong> {exam.exam_id}</p>
+                        <p><strong>عنوان:</strong> {exam.title}</p>
+                        <p><strong>درس:</strong> {exam.subject}</p>
+                        <p><strong>کاربر:</strong> {exam.user.name}</p>
+                        <p><strong>جواب درست:</strong> {exam.correct_answers}</p>
+                        <p><strong>جواب غلط:</strong> {exam.wrong_answers}</p>
+                        <p><strong>نمره:</strong> {(exam.correct_answers / (exam.correct_answers + exam.wrong_answers) * 100).toFixed(2)}%</p>
+                      </div>
+                    </details>
                   </div>
                 </div>
               ))}
             </div>
           )}
         </div>
+      </div>
+
+        {(selectedUser || selectedExam) && (
+          <div className='expand_container'>  
+            <div className="view-details-btn">
+              <button className="close-button" onClick={closeDetailView}>✖️</button>
+              {selectedUser && (
+                <div>
+                  <h2>جزئیات کاربر</h2>
+                  <p><strong>شناسه:</strong> {selectedUser.user_id}</p>
+                  <p><strong>نام:</strong> {selectedUser.name}</p>
+                  <p><strong>ایمیل:</strong> {selectedUser.email}</p>
+                  <p><strong>دانشگاه:</strong> {selectedUser.university}</p>
+                </div>
+              )}
+              {selectedExam && (
+                <div>
+                  <h2>جزئیات آزمون</h2>
+                  <p><strong>شناسه:</strong> {selectedExam.exam_id}</p>
+                  <p><strong>عنوان:</strong> {selectedExam.title}</p>
+                  <p><strong>درس:</strong> {selectedExam.subject}</p>
+                  <p><strong>کاربر:</strong> {selectedExam.user.name}</p>
+                  <p><strong>جواب درست:</strong> {selectedExam.correct_answers}</p>
+                  <p><strong>جواب غلط:</strong> {selectedExam.wrong_answers}</p>
+                  <p><strong>نمره:</strong> {(selectedExam.correct_answers / (selectedExam.correct_answers + selectedExam.wrong_answers) * 100).toFixed(2)}%</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="charts_container">
           <h2 className="charts_title"> نمودار ها 📊</h2>
-          <div className="percentage_chart">
-            <Pie data={pieData}/>
-          </div>
-          <div className="count_chart">
-            <Bar data={barData} />
+          <div className='chart_container'>
+            {/* <div className="percentage_chart">
+              <Pie data={pieData} options={pieOptions} />
+            </div> */}
+            {/* <div className="count_chart">
+              <Bar data={barData} options={barOptions}/>
+            </div> */}
           </div>
         </div>
       </div>
