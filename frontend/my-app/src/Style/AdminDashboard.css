@@ -377,7 +377,9 @@
 .charts_title {
   font-size: 1.5rem; 
   color: #fff; 
-  margin-bottom: 20px; 
+  margin-bottom: 5px; 
+  justify-self: center;
+  align-self: flex-start;
 }
 .charts_container{
   position: relative;
@@ -390,28 +392,40 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 2rem;
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: space-between;
   text-align: center;
   flex-wrap: wrap;
 }
 
-.percentage_chart{
-  margin: 25px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.06);  
-  border-radius: 20px;
-  flex: 1; 
-  min-width: 300px; 
+.percentage_chart {
+  margin: 10px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 30px;
+  min-width: 400px; 
+  height: 350px; 
 }
 
-.count_chart{
-  margin: 25px;
+.count_chart {
+  margin: 10px;
   padding: 10px;
-  background: rgba(255, 255, 255, 0.06);  
-  border-radius: 20px;
-  flex: 2; 
-  min-width: 400px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 30px;
+  min-width: 600px; 
+  height: 350px;
+  align-self: center;
+}
+
+.chart_container {
+  max-width: 1400px;
+  height: 500px; 
+  margin-top: 5px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 /* Responsive Design */
@@ -500,3 +514,39 @@
   border: #ef4444 2px solid;
   box-shadow: 7px 7px black;
 }
+
+.view-details-btn {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.view-details-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.details-modal {
+  border-radius: 0.5em;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  margin-top: 1em;
+  padding: 1em;
+}
+
+summary {
+  cursor: pointer;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
