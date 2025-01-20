@@ -9,66 +9,23 @@ import ExamCreate from './components/exams/ExamCreate';
 import './App.css';
 
 function App() {
-  const [isLoginView, setIsLoginView] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userData, setUserData] = useState(null);
 
   const handleToggleView = () => {
     setIsLoginView(!isLoginView);
   };
+
   const handleLoginSuccess = (user) => {
     setUserData(user);
-    // fix this part
     setIsAuthenticated(true);
 
   };
-  // useEffect(() => {
-  //   // Check if there's a valid access token
-  //   const token = localStorage.getItem('access_token');
-  //   if (token) {
-  //     verifyToken(token);
-  //   }
-  // }, []);
-
-  // const verifyToken = async (token) => {
-  //   try {
-  //     const response = await fetch('', {
-  //       method: 'GET',
-  //       headers: {
-  //         'Authorization': `Bearer ${token}`
-  //       }
-  //     });
-
-  //     if (response.ok) {
-  //       const user = await response.json();
-  //       setUserData(user);
-  //       setIsAuthenticated(true);
-  //     } else {
-  //       // Clear invalid token
-  //       localStorage.removeItem('access_token');
-  //       setIsAuthenticated(false);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error verifying token:', error);
-  //     localStorage.removeItem('access_token');
-  //     setIsAuthenticated(false);
-  //   }
-  // };
-
-  // const handleToggleView = () => {
-  //   setIsLoginView(!isLoginView);
-  // };
-
-  // const handleLoginSuccess = async (user) => {
-  //   const { access_token } = user;
-
-  //   // Store the token for future API requests
-  //   localStorage.setItem('access_token', access_token);
-
-  //   // Verify the token before setting user data
-  //   await verifyToken(access_token);
-  // };
-
+  const handleRegisterSuccess = (user) => {
+    setUserData(user);
+    setIsAuthenticated(true);
+  };
+  
   const handleLogout = () => {
     setUserData(null);
     setIsAuthenticated(false);
@@ -97,7 +54,7 @@ function App() {
             path="/login"
             element={
               isAuthenticated ? (
-                <Navigate to={userData.role === 'admin' ? '/admin' : '/dashboard'} />
+                <Navigate to={userData.is_admin ? '/admin' : '/dashboard'} /> 
               ) : (
                 <Login 
                   onRegisterClick={handleToggleView}
@@ -110,11 +67,11 @@ function App() {
             path="/register"
             element={
               isAuthenticated ? (
-                <Navigate to={userData.role === 'admin' ? '/admin' : '/dashboard'} />
+                <Navigate to={userData.is_admin ? '/admin' : '/dashboard'} />
               ) : (
                 <Register 
                   onLoginClick={handleToggleView}
-                  onRegisterSuccess={() => setIsLoginView(true)}
+                  onRegisterSuccess={handleRegisterSuccess}
                 />
               )
             }
@@ -122,7 +79,7 @@ function App() {
           <Route 
             path="/dashboard"
             element={
-              isAuthenticated && userData.role !== 'admin' ? (
+              isAuthenticated && !userData.is_admin ? (
                 <UserDashboard user={userData} onLogout={handleLogout} />
               ) : (
                 <Navigate to="/login" />
@@ -132,7 +89,7 @@ function App() {
           <Route 
             path="/admin"
             element={
-              isAuthenticated && userData.role === 'admin' ? (
+              isAuthenticated && userData.is_admin ? (
                 <AdminDashboard onLogout={handleLogout} />
               ) : (
                 <Navigate to="/login" />
@@ -149,6 +106,16 @@ function App() {
               )
             }
           />
+          <Route 
+  path="/exams/edit/:examId"  // Include the :examId parameter
+  element={
+    isAuthenticated ? (
+      <ExamEdit />
+    ) : (
+      <Navigate to="/login" />
+    )
+  }
+/>
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       </div>
