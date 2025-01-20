@@ -5,7 +5,6 @@ import logo from "../../assets/exam-system-logo.svg";
 import { authService } from "../../api/services";
 
 
-
 const FloatingParticle = ({ delay }) => {
   return (
     <div 
@@ -43,14 +42,20 @@ const Login = ({ onRegisterClick, onLoginSuccess }) => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: ''
   });
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false); 
 
   const handleToggleView = () => {
     navigate('/register'); 
+  };
+
+  const handlePasswordToggle = () => {
+    setIsPasswordVisible(prev => !prev);
   };
 
   const handleInputChange = (e) => {
@@ -62,139 +67,31 @@ const Login = ({ onRegisterClick, onLoginSuccess }) => {
     setError('');
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
     try {
-      const response = await axios.post('http://localhost:8000/login', {
-        email,
-        password,
+      const userData = await authService.login({
+          email: formData.email,
+          password: formData.password,
       });
-      const { access_token, ...user } = response.data; // Assuming the response has this structure
+
+      if (userData && typeof userData.is_admin !== 'undefined') {
+          onLoginSuccess(userData);
+          navigate(userData.is_admin ? '/admin' : '/dashboard');
+      } else {
+          throw new Error('Unexpected response structure');
+      }
       
-      localStorage.setItem('token', access_token); // Store token in local storage or state
-      onLoginSuccess(user); // Pass user data to parent
-    } catch (err) {
-      setError(err.response?.data?.detail || 'Login failed');
-    }
+  } catch (err) {
+      console.error("Error during login:", err.message);
+      setError(err.response?.data?.message || 'خطا در ورود. لطفاً دوباره تلاش کنید');  
+    } finally {
+      setIsLoading(false);
+  }
   };
-
-  // const handleSubmit = async (e) => {
-    // e.preventDefault();
-    // setIsLoading(true);
-    // setError('');
-
-    // try {
-
-    //     await new Promise(resolve => setTimeout(resolve, 1500));
-
-    //     if (formData.username.trim() === '' || formData.password.trim() === '') {
-    //       throw new Error('لطفاً ایمیل و رمز عبور را وارد کنید');
-    //     }
-    //           // Keep your existing admin check
-    //           if (formData.username === 'admin' && formData.password === '1234') {
-    //               const adminData = {
-    //                   username: formData.username,
-    //                   role: 'admin'
-    //               };
-    //               if (onLoginSuccess) {
-    //                   onLoginSuccess(adminData); 
-    //               }
-    //               return;
-    //           }
-      
-    //           // Add API call here
-    //           try {
-    //               const loginCredentials = {
-    //                   email: formData.email,
-    //                   password: formData.password
-    //               };
-    //               
-    //               // Try API login
-    //               const response = await authService.login(loginCredentials);
-    //               console.log('API Response:', response);
-      
-    //               // If API call succeeds, create userData
-    //               const userData = {
-    //                   email: formData.email,
-    //                   role: response.is_admin ? 'admin' : 'دانشجو'
-    //               };
-      
-    //               if (onLoginSuccess) {
-    //                   onLoginSuccess(userData);
-    //               }
-      
-    //           } catch (apiError) {
-    //               console.error('API Login failed:', apiError);
-    //               
-    //               // Fallback to your existing mock login
-    //               const userData = {
-    //                   username: formData.username,
-    //                   fullName: 'کاربر نمونه',
-    //                   email: 'user@example.com',
-    //                   university: 'دانشگاه نمونه',
-    //                   role: 'دانشجو'
-    //               };
-      
-    //               if (onLoginSuccess) {
-    //                   onLoginSuccess(userData);
-    //               }
-    //           }
-      
-    //       } catch (err) {
-    //           setError(err instanceof Error ? err.message : 'خطای نامشخص در ورود');  
-    //       } finally {
-    //           setIsLoading(false);
-    //       }
-
-    
-
-
-
-
-    // try {
-    //   await new Promise(resolve => setTimeout(resolve, 1500));
-
-    //   if (formData.username.trim() === '' || formData.password.trim() === '') {
-    //     throw new Error('لطفاً نام کاربری و رمز عبور را وارد کنید');
-    //   }
-
-
-    //   if (formData.username === 'admin' && formData.password === '1234') {
-    //     // Mock successful admin login response
-    //     const adminData = {
-    //     username: formData.username,
-    //     role: 'admin'
-    //     };
-
-    //     // Call onLoginSuccess with admin data
-    //     if (onLoginSuccess) {
-    //       onLoginSuccess(adminData); 
-    //     }
-    //     return;
-    //   }
-
-    //   // Mock successful login response
-    //   const userData = {
-    //     username: formData.username,
-    //     fullName: 'کاربر نمونه',
-    //     email: 'user@example.com',
-    //     university: 'دانشگاه نمونه',
-    //     role: 'دانشجو'
-    //   };
-
-    //   // Call onLoginSuccess with user data
-    //   if (onLoginSuccess) {
-    //     onLoginSuccess(userData);
-    //   }
-
-    //   console.log('ورود موفقیت‌آمیز', userData);
-    // } catch (err) {
-    //   setError(err instanceof Error ? err.message : 'خطای نامشخص در ورود');  
-    // } finally {
-    //   setIsLoading(false);
-    // }
-  // };
 
   return (
     <div className="login-page" dir="rtl">
@@ -216,7 +113,7 @@ const Login = ({ onRegisterClick, onLoginSuccess }) => {
             </div>
 
             {error && (
-              <div className="error-message">
+              <div className="error-message" style={{ color: 'red', marginBottom: '10px', display: 'flex', justifyContent:'center' ,fontSize:'15px'}}>
                 {error}
               </div>
             )}
@@ -224,15 +121,15 @@ const Login = ({ onRegisterClick, onLoginSuccess }) => {
             <form onSubmit={handleSubmit} className="form">
               <div className="input-fields">
                 <InputField
-                  id="username"
+                  id="email"
                   type="text"
-                  label="نام کاربری"
+                  label="ایمیل"
                   icon={() => (
                     <svg xmlns="http://www.w3.org/2000/svg" className="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   )}
-                  value={formData.username}
+                  value={formData.email}
                   onChange={handleInputChange}
                   required
                   disabled={isLoading}
@@ -241,12 +138,21 @@ const Login = ({ onRegisterClick, onLoginSuccess }) => {
 
                 <InputField
                   id="password"
-                  type="password"
+                  type={isPasswordVisible ? "text" : "password"}               
                   label="رمز عبور"
                   icon={() => (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div onClick={handlePasswordToggle} className="toggle-password-visibility">
+                      {isPasswordVisible ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
+
+                      )}
+                    </div>
                   )}
                   value={formData.password}
                   onChange={handleInputChange}  
@@ -255,7 +161,6 @@ const Login = ({ onRegisterClick, onLoginSuccess }) => {
                   placeholder="رمز عبور خود را وارد کنید"
                 />
               </div>
-
               <button
                 type="submit"
                 disabled={isLoading}
