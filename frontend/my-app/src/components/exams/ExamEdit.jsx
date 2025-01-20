@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import '../../style/ExamCreate.css';
-import { useNavigate } from 'react-router-dom';
-import { examService } from "../../api/services";
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import '../../style/ExamEdit.css';
+import { examService } from '../../api/services';
 
 const GlowingBackground = () => (
   <div className="glowing-background">
@@ -11,65 +11,58 @@ const GlowingBackground = () => (
   </div>
 );
 
-const ExamCreate = () => {
-  const navigate = useNavigate(); 
-  const [examData, setExamData] = useState({
-    title: '',
-    subject: '',
-    correctAnswer: '',
-    wrongAnswer: ''
-  });
+const ExamEdit = () => {
+  const { examId } = useParams();
+  const navigate = useNavigate();
+  const [examData, setExamData] = useState({ correct_answers: 0, wrong_answers: 0 });
 
-  const handleInputChange = (e) => {
+  useEffect(() => {
+    const fetchExamData = async () => {
+      try {
+        const exam = await examService.getExamById(examId); 
+        setExamData(exam);
+      } catch (error) {
+        alert("Error fetching exam data: " + error.message);
+      }
+    };
+
+    fetchExamData();
+  }, [examId]);
+
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setExamData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setExamData({ ...examData, [name]: value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-        const formattedData = {
-            title: examData.title,
-            subject: examData.subject,
-            correct_answers: parseInt(examData.correctAnswer),
-            wrong_answers: parseInt(examData.wrongAnswer)
-        };
-
-        await examService.createExam(formattedData);
-        navigate('/dashboard');
+      const updatedExam = await examService.updateExam(examId, examData);
+      setExamData(updatedExam); 
+      navigate('/exams');  
     } catch (error) {
-        console.error('Error creating exam:', error);
+      alert("Error saving exam: " + error.message);
     }
   };
-
-  const handleCancel = () => {
-    navigate('/dashboard');
-  };
-
+  
   return (
     <div className="exam-create-page" dir="rtl">
       <GlowingBackground />
-      
       <div className="exam-create-container">
         <div className="exam-create-card">
           <div className="card-header">
-            <h1 className="title">آزمون جدید</h1>
-            <p className="subtitle">مشخصات آزمون را وارد کنید</p>
+            <h1 className="title">ویرایش آزمون</h1>
           </div>
 
           <form onSubmit={handleSubmit} className="exam-form">
             <div className="form-grid">
-              <div className="input-group">
+              {/* <div className="input-group">
                 <label>عنوان آزمون</label>
                 <input
                   type="text"
                   name="title"
                   value={examData.title}
-                  onChange={handleInputChange}
+                  onChange={handleChange}
                   placeholder="مثال: آزمون میان‌ترم ریاضی ۱"
                   required
                 />
@@ -81,19 +74,19 @@ const ExamCreate = () => {
                   type="text"
                   name="subject"
                   value={examData.subject}
-                  onChange={handleInputChange}
+                  onChange={handleChange}
                   placeholder="مثال: ریاضی"
                   required
                 />
-              </div>
+              </div> */}
 
               <div className="input-group">
                 <label>تعداد صحیح</label>
                 <input
                   type="number"
-                  name="correctAnswer"
-                  value={examData.correctAnswer}
-                  onChange={handleInputChange}
+                  name="correct_answers"
+                  value={examData.correct_answers}
+                  onChange={handleChange}
                   placeholder="مثال: 4"
                   required
                 />
@@ -103,19 +96,17 @@ const ExamCreate = () => {
                 <label>تعداد غلط</label>
                 <input
                   type="number"
-                  name="wrongAnswer"
-                  value={examData.wrongAnswer}
-                  onChange={handleInputChange}
+                  name="wrong_answers"
+                  value={examData.wrong_answers}
+                  onChange={handleChange}
                   placeholder="مثال: 7"
                   required
                 />
               </div>
             </div>
             <div className="form-actions">
-              <button type="submit" className="submit-btn">
-                ایجاد آزمون
-              </button>
-              <button type="button" onClick={handleCancel} className="cancel-btn">
+              <button type="submit" className="submit-btn">ذخیره</button>
+              <button type="button" className="cancel-btn" onClick={() => navigate('/exams')}>
                 انصراف
               </button>
             </div>
@@ -126,4 +117,4 @@ const ExamCreate = () => {
   );
 };
 
-export default ExamCreate;
+export default ExamEdit;
