@@ -357,10 +357,9 @@
 
 .exam-footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  /* margin-top: 1rem; */
-  padding-top: 2rem;
+  padding-top: 1.5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   flex-wrap: wrap;
   gap: 0.75rem;
@@ -671,27 +670,4 @@
     padding: 1rem;
   }
 
-}
-.logout_conatiner{
-  display: flex;
-  text-align: center;
-  justify-content: flex-end;
-  align-items: center;
-  padding: 5px;
-  margin-bottom: 10px;
-  margin-left: 40px;
-  width: auto;
-}
-.logout-button{
-  background-color: #ef4444;
-  border-radius: 10px;
-  border: #ef4444 2px solid;
-  transition: transform ease-in 0.3s;
-  color: white;
-  font-size: 13px;
-}
-.logout-button:hover{
-  transform: scale(1.05);
-  border: #ef4444 2px solid;
-  box-shadow: 7px 7px black;
 }
