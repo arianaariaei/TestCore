@@ -5,6 +5,7 @@ import Register from './components/auth/Register';
 import UserDashboard from './components/dashboard/UserDashboard';
 import AdminDashboard from './components/dashboard/AdminDashboard';
 import ExamCreate from './components/exams/ExamCreate';
+import ExamEdit from './components/exams/ExamEdit';
 
 import './App.css';
 
@@ -107,15 +108,15 @@ function App() {
             }
           />
           <Route 
-  path="/exams/edit/:examId"  // Include the :examId parameter
-  element={
-    isAuthenticated ? (
-      <ExamEdit />
-    ) : (
-      <Navigate to="/login" />
-    )
-  }
-/>
+            path="/exams/edit/:examId" 
+            element={
+              isAuthenticated ? (
+              <ExamEdit />
+              ) : (
+              <Navigate to="/login" />
+              )
+              }
+          />
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       </div>

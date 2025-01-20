@@ -78,7 +78,15 @@ async def login(login_data: LoginRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     access_token = create_access_token(data={"sub": user.email})
-    return {"User": user, "access_token": access_token, "token_type": "bearer"}
+    return {
+        "User": {
+            "email": user.email,
+            "is_admin": user.is_admin,
+        },
+        "access_token": access_token,
+        "token_type": "bearer"
+    }
+
 
 
 # 2. Exam Management APIs
