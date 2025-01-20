@@ -50,7 +50,7 @@ const AdminDashboard = ({ onLogout }) => {
 //     return `#${randomColor}`;
 // }
 
-// // Generate background colors based on the number of subjects
+// Generate background colors based on the number of subjects
 // const subjects = exams.map(exam => exam.subject);
 // const subjectCounts = subjects.reduce((acc, subject) => {
 //   acc[subject] = (acc[subject] || 0) + 1;
@@ -109,6 +109,7 @@ const AdminDashboard = ({ onLogout }) => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedExam, setSelectedExam] = useState(null);
   const [sortDirection, setSortDirection] = useState('asc'); 
+  const [selectedUserExams, setSelectedUserExams] = useState(null);
 
 
   const handleSort = (field) => {
@@ -186,13 +187,31 @@ const AdminDashboard = ({ onLogout }) => {
     }
   };
 
+  const handleUserClick = async (userId) => {
+    try {
+      const examDetails = await examService.getUserExamDetails(userId);
+      setSelectedUserExams(examDetails);
+    } catch (error) {
+      console.error('Error fetching user exam details:', error);
+    }
+  };
+
+  const closeModal = () => {
+    setSelectedUserExams(null);
+  };
+  
+  const closeDetailView = () => {
+    setSelectedUser(null);
+    setSelectedExam(null);
+  };
+
   return (
     <div className="admin-dashboard" dir="rtl">
-      <div className="logout_conatiner">
+      {/* <div className="logout_conatiner">
         <button className="logout-button" onClick={onLogout}>
           خروج
         </button>
-      </div>
+      </div> */}
       <div className="glowing-background">
         <div className="glow-ball-1"></div>
         <div className="glow-ball-2"></div>
@@ -206,10 +225,11 @@ const AdminDashboard = ({ onLogout }) => {
             <p>مدیریت کاربران و آزمون‌ها</p>
           </div>
           
-          <div className="header-actions">
-            <div className="search-container">
-              <span className="search-icon">🔍</span>
-              <input
+           <div className="header-actions">
+              <div className='header_container'>    
+             <div className="search-container">
+               <span className="search-icon">🔍</span>
+               <input
                 type="text"
                 placeholder="جستجو..."
                 value={searchQuery}
@@ -217,11 +237,14 @@ const AdminDashboard = ({ onLogout }) => {
                 className="search-input"
               />
             </div>
+            <button className="logout" onClick={onLogout}>خروج
+              </button>
+              </div>
           </div>
         </header>
 
-        <div className="stats-grid">
-          {stats.map((stat, index) => (
+         <div className="stats-grid">
+           {stats.map((stat, index) => (
             <div key={index} className={`stat-card ${stat.gradient}`}>
               <div className="stat-icon">{stat.icon}</div>
               <div className="stat-content">
@@ -233,8 +256,8 @@ const AdminDashboard = ({ onLogout }) => {
         </div>
 
         <div className="content-section">
-          <div className="tabs">
-            <button 
+           <div className="tabs">
+             <button 
               className={`tab ${activeTab === 'users' ? 'active' : ''}`}
               onClick={() => setActiveTab('users')}
             >
@@ -248,8 +271,8 @@ const AdminDashboard = ({ onLogout }) => {
             </button>
           </div>
 
-          <div className="content-section">
-          {loadingUsers || loadingExams ? (
+           <div className="content-section">
+           {loadingUsers || loadingExams ? (
             <p>در حال بارگذاری...</p>
           ) : error ? (
             <p>{error}</p>
@@ -261,32 +284,34 @@ const AdminDashboard = ({ onLogout }) => {
                 <div className="header-cell">دانشگاه</div>
                 <div className="header-cell">عملیات</div>
               </div>
-              {users.map(user => (
+               {users.map(user => (
                 <div key={user.id} className="table-row">
                   <div className="cell">{user.name}</div>
                   <div className="cell">{user.email}</div>
                   <div className="cell">{user.university}</div>
                   <div className="cell actions">
                     <button className="action-btn" onClick={() => handleDelete(user.user_id)}>
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                      </svg>
+                     🗑️
                     </button>
-                    <details>
-                      <summary className="action-btn view" title="مشاهده">👁️</summary>
-                      <div className="details-modal">
-                        <p><strong>شناسه:</strong> {user.user_id}</p>
-                        <p><strong>نام:</strong> {user.name}</p>
-                        <p><strong>ایمیل:</strong> {user.email}</p>
-                        <p><strong>دانشگاه:</strong> {user.university}</p>
-                        <p><strong>ادمین:</strong> {user.is_admin ? 'بله' : 'خیر'}</p>
-                      </div>
-                    </details>
+                    <button className="action-btn" onClick={() => handleUserClick(user.user_id)}>
+                      📋
+                    </button>
+                     <details>
+                       <summary className="action-btn view" title="مشاهده">👁️</summary>
+                       <div className="details-modal">
+                         <p><strong>شناسه:</strong> {user.user_id}</p>
+                         <p><strong>نام:</strong> {user.name}</p>
+                         <p><strong>ایمیل:</strong> {user.email}</p>
+                         <p><strong>دانشگاه:</strong> {user.university}</p>
+                         <p><strong>ادمین:</strong> {user.is_admin ? 'بله' : 'خیر'}</p>
+                       </div>
+                     </details>
                     
-                  </div>
-                </div>
+                   </div>
+                 </div>
               ))}
             </div>
+            
           ) : (
             <div className="data-table">
               <div className="table-header">
@@ -301,19 +326,19 @@ const AdminDashboard = ({ onLogout }) => {
                   <div className="cell">{exam.user.name}</div>
                   <div className="cell">{(exam.correct_answers / (exam.correct_answers + exam.wrong_answers) * 100).toFixed(2)}%</div>
                   <div className="cell actions">
-                    <details>
-                      <summary className="action-btn view" title="مشاهده">👁️</summary>
-                      <div className="details-modal">
-                        <p><strong>شناسه:</strong> {exam.exam_id}</p>
-                        <p><strong>عنوان:</strong> {exam.title}</p>
-                        <p><strong>درس:</strong> {exam.subject}</p>
-                        <p><strong>کاربر:</strong> {exam.user.name}</p>
-                        <p><strong>جواب درست:</strong> {exam.correct_answers}</p>
-                        <p><strong>جواب غلط:</strong> {exam.wrong_answers}</p>
-                        <p><strong>نمره:</strong> {(exam.correct_answers / (exam.correct_answers + exam.wrong_answers) * 100).toFixed(2)}%</p>
-                      </div>
-                    </details>
-                  </div>
+                     <details>
+                       <summary className="action-btn view" title="مشاهده">👁️</summary>
+                       <div className="details-modal">
+                         <p><strong>شناسه:</strong> {exam.exam_id}</p>
+                         <p><strong>عنوان:</strong> {exam.title}</p>
+                         <p><strong>درس:</strong> {exam.subject}</p>
+                         <p><strong>کاربر:</strong> {exam.user.name}</p>
+                         <p><strong>جواب درست:</strong> {exam.correct_answers}</p>
+                         <p><strong>جواب غلط:</strong> {exam.wrong_answers}</p>
+                         <p><strong>نمره:</strong> {(exam.correct_answers / (exam.correct_answers + exam.wrong_answers) * 100).toFixed(2)}%</p>
+                       </div>
+                     </details>
+                   </div>
                 </div>
               ))}
             </div>
@@ -321,10 +346,10 @@ const AdminDashboard = ({ onLogout }) => {
         </div>
       </div>
 
-        {(selectedUser || selectedExam) && (
+         {(selectedUser || selectedExam) && (
           <div className='expand_container'>  
             <div className="view-details-btn">
-              <button className="close-button" onClick={closeDetailView}>✖️</button>
+              <button className="close-button" onClick={closeDetailView}>✖</button>
               {selectedUser && (
                 <div>
                   <h2>جزئیات کاربر</h2>
@@ -332,7 +357,9 @@ const AdminDashboard = ({ onLogout }) => {
                   <p><strong>نام:</strong> {selectedUser.name}</p>
                   <p><strong>ایمیل:</strong> {selectedUser.email}</p>
                   <p><strong>دانشگاه:</strong> {selectedUser.university}</p>
-                </div>
+
+                  
+                 </div>
               )}
               {selectedExam && (
                 <div>
@@ -349,21 +376,47 @@ const AdminDashboard = ({ onLogout }) => {
             </div>
           </div>
         )}
-
-        <div className="charts_container">
-          <h2 className="charts_title"> نمودار ها 📊</h2>
-          <div className='chart_container'>
-            {/* <div className="percentage_chart">
-              <Pie data={pieData} options={pieOptions} />
-            </div> */}
-            {/* <div className="count_chart">
-              <Bar data={barData} options={barOptions}/>
-            </div> */}
+            {selectedUserExams && (
+        <div className='modal'>
+          <div className='modal-content'>
+            <button className="close-button" onClick={closeModal}>✖️</button>
+            <ul>
+                  {selectedUserExams.exams.map(exam => (
+                    <li key={exam.id}>
+                      <div>
+                        <strong>عنوان:</strong> {exam.title} <br />
+                        <strong>نمره:</strong> {exam.score_percentage.toFixed(2)}% <br />
+                        <strong>جواب درست:</strong> {exam.correct_answers} <br />
+                        <strong>جواب غلط:</strong> {exam.wrong_answers}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                <div>
+                  <strong>خلاصه:</strong>
+                  <p>تعداد آزمون‌ها: {selectedUserExams.summary.total_exams}</p>
+                  <p>تعداد پاسخ‌های درست: {selectedUserExams.summary.total_correct_answers}</p>
+                  <p>تعداد پاسخ‌های غلط: {selectedUserExams.summary.total_wrong_answers}</p>
+                  <p>میانگین نمره: {selectedUserExams.summary.average_score.toFixed(2)}%</p>
+                </div>
           </div>
         </div>
-      </div>
-    </div>
-  );
-};
+      )}
+      
+         <div className="charts_container">
+           <h2 className="charts_title"> نمودار ها 📊</h2>
+           <div className='chart_container'>
+             {/* <div className="percentage_chart">
+               <Pie data={pieData} options={pieOptions} />
+             </div> */}
+             {/* <div className="count_chart">
+               <Bar data={barData} options={barOptions}/>
+             </div> */}
+           </div>
+         </div>
+       </div>
+     </div>
+   );
+ };
 
-export default AdminDashboard;
+ export default AdminDashboard;

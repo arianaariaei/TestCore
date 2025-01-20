@@ -56,30 +56,6 @@ const ExamEdit = () => {
 
           <form onSubmit={handleSubmit} className="exam-form">
             <div className="form-grid">
-              {/* <div className="input-group">
-                <label>عنوان آزمون</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={examData.title}
-                  onChange={handleChange}
-                  placeholder="مثال: آزمون میان‌ترم ریاضی ۱"
-                  required
-                />
-              </div>
-
-              <div className="input-group">
-                <label>درس</label>
-                <input
-                  type="text"
-                  name="subject"
-                  value={examData.subject}
-                  onChange={handleChange}
-                  placeholder="مثال: ریاضی"
-                  required
-                />
-              </div> */}
-
               <div className="input-group">
                 <label>تعداد صحیح</label>
                 <input

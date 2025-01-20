@@ -169,4 +169,18 @@ export const examService = {
           throw error;
         }
       },
+      getExamsBySubject: async () => {
+        const token = localStorage.getItem('token');
+        try {
+            const response = await api.get('/reports/exams-by-subject', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching exams by subject:', error);
+            throw error;
+        }
+    },
 };
