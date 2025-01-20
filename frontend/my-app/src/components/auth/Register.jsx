@@ -30,12 +30,12 @@ const InputField = ({ icon: Icon, label, ...props }) => (
   </div>
 );
 
-const Register = ({ onLoginClick }) => {
+const Register = ({ onLoginClick , onRegisterSuccess }) => {
   const navigate = useNavigate();
 
 
   const [formData, setFormData] = useState({
-    username: '',
+    name: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -44,10 +44,9 @@ const Register = ({ onLoginClick }) => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showPassword, setShowPassword] = useState(false); 
+  const [showConfirmedPassword, setConfirmedShowPassword] = useState(false); 
 
-  const handleToggleView = () => {
-    navigate('/Login'); 
-  };
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -56,6 +55,14 @@ const Register = ({ onLoginClick }) => {
       [id]: value
     }));
     setError(null);
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(prev => !prev);
+  };
+  
+  const toggleConfirmedPasswordVisibility = () => {
+    setConfirmedShowPassword(prev => !prev);
   };
 
   const validateForm = () => {
@@ -87,25 +94,34 @@ const Register = ({ onLoginClick }) => {
     return true;
   };
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-
     setLoading(true);
     setError(null);
-
+    
     try {
-      // اینجا می‌توانید کد مربوط به ارسال اطلاعات به سرور را اضافه کنید
-      await new Promise(resolve => setTimeout(resolve, 1500)); // شبیه‌سازی تأخیر شبکه
+      const userData = {
+        name: formData.name, 
+        email: formData.email,
+        password: formData.password,
+        university: formData.university,
+      };
+
+      const response = await authService.register(userData);
+
+      const user = {
+        name: response.name,
+        email: response.email,
+    };
+
+      if (onRegisterSuccess) {
+        onRegisterSuccess(user); 
+      }
+
+      navigate('/dashboard');
       
-      console.log('اطلاعات ثبت‌نام:', formData);
-      
-      // پاک کردن فرم
       setFormData({
-        username: '',
+        name: '',
         email: '',
         password: '',
         confirmPassword: '',
@@ -113,7 +129,8 @@ const Register = ({ onLoginClick }) => {
       });
 
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'خطا در ثبت‌نام. لطفاً دوباره تلاش کنید');
+      console.error('Registration error:', err.response ? err.response.data : err.message);
+      setError(err.response?.data?.detail || 'خطا در ثبت‌نام. لطفاً دوباره تلاش کنید');
     } finally {
       setLoading(false);
     }
@@ -160,22 +177,22 @@ const Register = ({ onLoginClick }) => {
             </div>
 
             {error && (
-              <div className="error-message">
-                {error}
+              <div className="error-message" style={{ color: 'red', marginBottom: '10px', display: 'flex', justifyContent:'center' ,fontSize:'15px'}}>
+              {error}
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="form">
               <InputField
-                id="username"
+                id="name"
                 type="text"
-                label="نام کاربری"
+                label="نام"
                 icon={UserIcon}
-                value={formData.username}
+                value={formData.name}
                 onChange={handleInputChange}
                 required
                 disabled={loading}
-                placeholder="نام کاربری خود را وارد کنید"
+                placeholder="نام خود را وارد کنید"
               />
 
               <InputField
@@ -190,29 +207,41 @@ const Register = ({ onLoginClick }) => {
                 placeholder="ایمیل خود را وارد کنید"
               />
 
-              <InputField
-                id="password"
-                type="password"
-                label="گذرواژه"
-                icon={LockIcon}
-                value={formData.password}
-                onChange={handleInputChange}
-                required
-                disabled={loading}
-                placeholder="گذرواژه خود را وارد کنید"
-              />
+              <div className="input-field">
+                <div className="input-background" />
+                <div className="input-wrapper">
+                  <label className="label">گذرواژه</label>
+                  <input
+                    id="password"
+                    type={showPassword ? "text" : "password"} 
+                    className="input"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    required
+                    disabled={loading}
+                    placeholder="گذرواژه خود را وارد کنید"
+                  />
+                  <LockIcon className="input-icon" onClick={togglePasswordVisibility} />
+                </div>
+              </div>
 
-              <InputField
-                id="confirmPassword"
-                type="password"
-                label="تأیید گذرواژه"
-                icon={LockIcon}
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                required
-                disabled={loading}
-                placeholder="گذرواژه را مجدداً وارد کنید"
-              />
+              <div className="input-field">
+                <div className="input-background" />
+                <div className="input-wrapper">
+                  <label className="label">تأیید گذرواژه</label>
+                  <input
+                    id="confirmPassword"
+                    type={showConfirmedPassword ? "text" : "password"} 
+                    className="input"
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
+                    required
+                    disabled={loading}
+                    placeholder="گذرواژه را مجدداً وارد کنید"
+                  />
+                  <LockIcon className="input-icon" onClick={toggleConfirmedPasswordVisibility} />
+                </div>
+              </div>
 
               <InputField
                 id="university"
@@ -235,14 +264,19 @@ const Register = ({ onLoginClick }) => {
               </button>
             </form>
 
-            <button
-              type="button"
-              onClick={handleToggleView}   
-              className="login-link"
-              disabled={loading}
-            >
+            <div className='link_button_container'>
+              <button
+                type="button"
+                onClick={() => {
+                  navigate('/Login'); 
+                  onLoginClick(); 
+                }}
+                className="login-link"
+                disabled={loading}
+              >
               قبلاً ثبت‌نام کرده‌اید؟ ورود
-            </button>
+              </button>
+            </div>
           </div>
         </div>
       </div>
