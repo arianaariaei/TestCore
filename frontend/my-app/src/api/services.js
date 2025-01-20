@@ -156,4 +156,17 @@ export const examService = {
             throw error;
         }
     },
+    deleteUser: async (userId) => {
+        const token = localStorage.getItem('token');
+        try {
+          await api.delete(`/users/${userId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+        } catch (error) {
+          console.error('Error deleting user:', error);
+          throw error;
+        }
+      },
 };
