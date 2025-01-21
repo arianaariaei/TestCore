@@ -183,4 +183,20 @@ export const examService = {
             throw error;
         }
     },
+
+    getUserExamCount: async () => {
+        try {
+            const response = await api.get('/reports/user-exam-counts', {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`, // Adjust according to your auth flow
+                    'Content-Type': 'application/json',
+                },
+            });
+            
+            return response.data;
+        } catch (error) {
+
+            throw new Error('Failed to fetch user exam counts: ' + error.message);
+        }
+    },
 };

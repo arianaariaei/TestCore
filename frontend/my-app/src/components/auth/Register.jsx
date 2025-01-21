@@ -66,7 +66,7 @@ const Register = ({ onLoginClick , onRegisterSuccess }) => {
   };
 
   const validateForm = () => {
-    if (!formData.username.trim()) {
+    if (!formData.name.trim()) {
       setError('لطفاً نام خود را وارد کنید');
       return false;
     }

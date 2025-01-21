@@ -5,6 +5,8 @@ import { examService } from '../../api/services';
 import '../../Style/AdminDashboard.css';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 
+ChartJS.register(ArcElement, Tooltip, Legend);
+
 
 const AdminDashboard = ({ onLogout }) => {
   const navigate = useNavigate();
@@ -39,70 +41,57 @@ const AdminDashboard = ({ onLogout }) => {
         setLoadingExams(false);
       }
     };
-
     fetchUsers();
     fetchExams();
   }, []);
 
-  // Prepare data for pie chart
-// function getRandomColor() {
-//     const randomColor = Math.floor(Math.random()*16777215).toString(16);
-//     return `#${randomColor}`;
-// }
 
-// Generate background colors based on the number of subjects
-// const subjects = exams.map(exam => exam.subject);
-// const subjectCounts = subjects.reduce((acc, subject) => {
-//   acc[subject] = (acc[subject] || 0) + 1;
-//   return acc;
-// }, {});
+const subjects = exams.map(exam => exam.subject);
+const subjectCounts = subjects.reduce((acc, subject) => {
+  acc[subject] = (acc[subject] || 0) + 1;
+  return acc;
+}, {});
 
-// const totalExams = exams.length; // Ensure this is defined
-// const backgroundColors = Array.from({ length: Object.keys(subjectCounts).length }, getRandomColor);
 
-// const pieData = {
-//   labels: Object.keys(subjectCounts),
-//   datasets: [
-//     {
-//       label: 'درصد آزمون',
-//       data: totalExams === 0 ? [] : Object.values(subjectCounts).map(count => (count / totalExams) * 100),
-//       backgroundColor: backgroundColors,
-//       hoverOffset: 4,
-//     },
-//   ],
-// };
+const subjectLabels = Object.keys(subjectCounts);
+const subjectData = Object.values(subjectCounts);
 
-//   const pieOptions = {
-//     responsive: true,
-//     maintainAspectRatio: false,
-//   };
+const totalExams = subjectData.reduce((acc, count) => acc + count, 0);
 
-  // const userExamCounts = users.map(user => {
-  //   const userExams = exams.filter(exam => exam.user.user_id === user.user_id);
-  //   return {
-  //     userId: user.user_id,
-  //     name: user.name,
-  //     examCount: userExams.length,
-  //   };
-  // });
+function getRandomColor() {
+  const randomColor = Math.floor(Math.random()*16777215).toString(16);
+  return `#${randomColor}`;
+}
 
-  // const barData = {
-  //   labels: userExamCounts.map(user => user.name),
-  //   datasets: [
-  //     {
-  //       label: 'تعداد آزمون',
-  //       data: userExamCounts.map(user => user.examCount),
-  //       backgroundColor: 'rgba(3, 194, 252, 0.6)',
-  //       borderColor: 'rgba(3, 194, 252, 1)',
-  //       borderWidth: 1,
-  //     },
-  //   ],
-  // };
-  
-  // const barOptions = {
-  //   responsive: true,
-  //   maintainAspectRatio: false,
-  // };
+const backgroundColors = Array.from({ length: subjectLabels.length }, getRandomColor);
+
+const pieChartData = {
+  labels: subjectLabels,
+  datasets: [
+    {
+      label: 'Subject Distribution',
+      data: subjectData,
+      backgroundColor: backgroundColors,
+      borderWidth: 1,
+    },
+  ],
+};
+
+const pieOptions = {
+  plugins: {
+    tooltip: {
+      callbacks: {
+        label: (tooltipItem) => {
+          const label = tooltipItem.label || '';
+          const value = tooltipItem.formattedValue || 0;
+          const percentage = ((value / totalExams) * 100).toFixed(2);
+          return `${label}: ${value} (${percentage}%)`;
+        },
+      },
+    },
+  },
+};
+
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('users');
   const [sortField, setSortField] = useState('');
@@ -174,18 +163,39 @@ const AdminDashboard = ({ onLogout }) => {
       gradient: "gradient-green"
     }
   ];
+
+  // const handleDelete = async (userId) => {
+  //   const confirmDelete = window.confirm("آیا مطمئن هستید که می‌خواهید این کاربر را حذف کنید؟");
+  //   if (!confirmDelete) return;
+  
+  //   try {
+  //     await examService.deleteUser(userId); 
+  //     setUsers(users.filter(user => user.user_id !== userId));  
+  //   } catch (error) {
+  //     console.error('Error deleting user:', error);
+  //     alert('حذف کاربر با خطا مواجه شد');
+  //   }
+  // };
+
   const handleDelete = async (userId) => {
     const confirmDelete = window.confirm("آیا مطمئن هستید که می‌خواهید این کاربر را حذف کنید؟");
     if (!confirmDelete) return;
-  
-    try {
-      await examService.deleteUser(userId); 
-      setUsers(users.filter(user => user.user_id !== userId));  
-    } catch (error) {
-      console.error('Error deleting user:', error);
-      alert('حذف کاربر با خطا مواجه شد');
+
+    const userToDelete = users.find(user => user.user_id === userId);
+    
+    if (userToDelete && userToDelete.is_admin) {
+        alert('حذف کاربر ادمین ممکن نیست');
+        return; 
     }
-  };
+
+    try {
+        await examService.deleteUser(userId);
+        setUsers(users.filter(user => user.user_id !== userId));  
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        alert('حذف کاربر با خطا مواجه شد');
+    }
+};
 
   const handleUserClick = async (userId) => {
     try {
@@ -207,11 +217,6 @@ const AdminDashboard = ({ onLogout }) => {
 
   return (
     <div className="admin-dashboard" dir="rtl">
-      {/* <div className="logout_conatiner">
-        <button className="logout-button" onClick={onLogout}>
-          خروج
-        </button>
-      </div> */}
       <div className="glowing-background">
         <div className="glow-ball-1"></div>
         <div className="glow-ball-2"></div>
@@ -279,14 +284,18 @@ const AdminDashboard = ({ onLogout }) => {
           ) : activeTab === 'users' ? (
             <div className="data-table">
               <div className="table-header">
-                <div className="header-cell">نام</div>
-                <div className="header-cell">ایمیل</div>
-                <div className="header-cell">دانشگاه</div>
-                <div className="header-cell">عملیات</div>
+                <div className="header-cell">نام ▼</div>
+                <div className="header-cell">ایمیل ▼</div>
+                <div className="header-cell">دانشگاه ▼</div>
+                <div className="header-cell">عملیات ▼</div>
               </div>
-               {users.map(user => (
+               {filteredUsers.map(user => (
                 <div key={user.id} className="table-row">
-                  <div className="cell">{user.name}</div>
+                  {/* <div className="cell">{user.name}</div> */}
+                  <div className="cell">
+                    {user.name}
+                      {user.is_admin && <span role="img" aria-label="admin icon" style={{ marginLeft: '5px' }}>👤</span>}
+                  </div>
                   <div className="cell">{user.email}</div>
                   <div className="cell">{user.university}</div>
                   <div className="cell actions">
@@ -295,7 +304,7 @@ const AdminDashboard = ({ onLogout }) => {
                     </button>
                     <button className="action-btn" onClick={() => handleUserClick(user.user_id)}>
                       📋
-                    </button>
+                    </button>     
                      <details>
                        <summary className="action-btn view" title="مشاهده">👁️</summary>
                        <div className="details-modal">
@@ -306,21 +315,24 @@ const AdminDashboard = ({ onLogout }) => {
                          <p><strong>ادمین:</strong> {user.is_admin ? 'بله' : 'خیر'}</p>
                        </div>
                      </details>
-                    
+                     {/* {!user.is_admin && (
+                        <button className="action-btn" onClick={() => handleUserClick(user.user_id)}>
+                          📋
+                        </button>
+                      )} */}
                    </div>
                  </div>
-              ))}
+              ))} 
             </div>
-            
           ) : (
             <div className="data-table">
               <div className="table-header">
-                <div className="header-cell">عنوان آزمون</div>
-                <div className="header-cell">کاربر</div>
-                <div className="header-cell">نمره</div>
-                <div className="header-cell">عملیات</div>
+                <div className="header-cell">عنوان آزمون ▼</div>
+                <div className="header-cell">کاربر ▼</div>
+                <div className="header-cell">نمره ▼</div>
+                <div className="header-cell">عملیات ▼</div>
               </div>
-              {exams.map(exam => (
+              {filteredExams.map(exam => (
                 <div key={exam.exam_id} className="table-row">
                   <div className="cell">{exam.title}</div>
                   <div className="cell">{exam.user.name}</div>
@@ -356,13 +368,11 @@ const AdminDashboard = ({ onLogout }) => {
                   <p><strong>شناسه:</strong> {selectedUser.user_id}</p>
                   <p><strong>نام:</strong> {selectedUser.name}</p>
                   <p><strong>ایمیل:</strong> {selectedUser.email}</p>
-                  <p><strong>دانشگاه:</strong> {selectedUser.university}</p>
-
-                  
+                  <p><strong>دانشگاه:</strong> {selectedUser.university}</p>                  
                  </div>
               )}
               {selectedExam && (
-                <div>
+                <div >
                   <h2>جزئیات آزمون</h2>
                   <p><strong>شناسه:</strong> {selectedExam.exam_id}</p>
                   <p><strong>عنوان:</strong> {selectedExam.title}</p>
@@ -379,7 +389,7 @@ const AdminDashboard = ({ onLogout }) => {
             {selectedUserExams && (
         <div className='modal'>
           <div className='modal-content'>
-            <button className="close-button" onClick={closeModal}>✖️</button>
+            <button className="close-button" onClick={closeModal}>🗙</button>
             <ul>
                   {selectedUserExams.exams.map(exam => (
                     <li key={exam.id}>
@@ -400,22 +410,33 @@ const AdminDashboard = ({ onLogout }) => {
                   <p>میانگین نمره: {selectedUserExams.summary.average_score.toFixed(2)}%</p>
                 </div>
           </div>
-        </div>
-      )}
+        </div>)}
       
-         <div className="charts_container">
-           <h2 className="charts_title"> نمودار ها 📊</h2>
-           <div className='chart_container'>
-             {/* <div className="percentage_chart">
-               <Pie data={pieData} options={pieOptions} />
-             </div> */}
-             {/* <div className="count_chart">
-               <Bar data={barData} options={barOptions}/>
-             </div> */}
-           </div>
-         </div>
-       </div>
-     </div>
+        <div className="charts_container">
+          <h2 className="charts_title">نمودار  📊</h2>
+            <div className='chart_container'>
+              {loadingExams ? (
+                <p>در حال بارگذاری نمودار...</p>
+                ) : error ? (
+                <p>{error}</p>
+                ) : ( 
+                <div className="percentage_chart">
+                  {subjectData.length > 0 ? (
+                    
+                  <Pie data={pieChartData} options={pieOptions} />
+                  ) : (
+                  <p>هیچ داده‌ای برای نمایش وجود ندارد.</p>
+                  )}
+                </div>
+                )}
+              {/* <div className="count_chart">
+                <h3>تعداد آزمون‌ها بر اساس کاربر</h3>
+                <Bar data={barChartData} options={barOptions} />
+              </div> */}
+            </div>
+        </div>
+      </div>
+    </div>
    );
  };
 
