@@ -10,6 +10,7 @@ from models.user import User
 from models.user_exam import user_exams
 from schemas import UserCreate, LoginRequest, ExamCreate, ExamUpdate
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import func
 
 init_db()
 app = FastAPI(title="Test Management System")
@@ -384,7 +385,7 @@ async def get_users_exam_count(
             User.name,
             User.email,
             User.university,
-            db.func.count(user_exams.c.exam_id).label('total_exams')
+            func.count(user_exams.c.exam_id).label('total_exams')  # Changed from db.func to func
         )
         .outerjoin(user_exams, User.user_id == user_exams.c.user_id)
         .group_by(User.user_id)
