@@ -4,6 +4,7 @@ import { Pie, Bar } from 'react-chartjs-2';
 import { examService } from '../../api/services';
 import '../../Style/AdminDashboard.css';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import Chart from 'react-apexcharts';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -16,6 +17,7 @@ const AdminDashboard = ({ onLogout }) => {
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [loadingExams, setLoadingExams] = useState(true);
   const [error, setError] = useState(null);
+  const [userExamCounts, setUserExamCounts] = useState([]);
   
   useEffect(() => {
     const fetchUsers = async () => {
@@ -41,8 +43,20 @@ const AdminDashboard = ({ onLogout }) => {
         setLoadingExams(false);
       }
     };
+
+    const fetchUserExamCounts = async () => {
+      try {
+          const counts = await examService.getUserExamCount();
+          setUserExamCounts(counts);
+      } catch (err) {
+        console.error('Error fetching user exam counts:', err);
+        setError('Failed to load user exam counts');
+      }
+    };
+
     fetchUsers();
     fetchExams();
+    fetchUserExamCounts()
   }, []);
 
 
@@ -57,6 +71,7 @@ const subjectLabels = Object.keys(subjectCounts);
 const subjectData = Object.values(subjectCounts);
 
 const totalExams = subjectData.reduce((acc, count) => acc + count, 0);
+const subjectPercentages = subjectData.map(count => ((count / totalExams) * 100).toFixed(2));
 
 function getRandomColor() {
   const randomColor = Math.floor(Math.random()*16777215).toString(16);
@@ -69,9 +84,10 @@ const pieChartData = {
   labels: subjectLabels,
   datasets: [
     {
-      label: 'Subject Distribution',
-      data: subjectData,
+      label: 'درصد درس',
+      data: subjectPercentages,
       backgroundColor: backgroundColors,
+      borderColor: 'white',
       borderWidth: 1,
     },
   ],
@@ -79,16 +95,102 @@ const pieChartData = {
 
 const pieOptions = {
   plugins: {
-    tooltip: {
-      callbacks: {
-        label: (tooltipItem) => {
-          const label = tooltipItem.label || '';
-          const value = tooltipItem.formattedValue || 0;
-          const percentage = ((value / totalExams) * 100).toFixed(2);
-          return `${label}: ${value} (${percentage}%)`;
-        },
+    legend: {
+      labels: {
+        color: 'black',
       },
     },
+  },
+};
+
+const userIds = userExamCounts.map(count => count.user_id);
+const examCounts = userExamCounts.map(count => count.total_exams || 0);
+
+const barChartOptions = {
+  series: [{
+    name: 'تعداد آزمون‌ها',
+    data: examCounts,
+  }],
+  chart: {
+    height: 350,
+    type: 'bar',
+    tooltip: {
+      enabled: false, 
+    },
+    toolbar: {
+      show: false,
+    },
+  },
+  plotOptions: {
+    bar: {
+      borderRadius: 10,
+      dataLabels: {
+        position: 'top', 
+      },
+    },
+  },
+  dataLabels: {
+    enabled: false, 
+  },
+  tooltip: { 
+    enabled: false,
+  },
+  xaxis: {
+    categories: userIds,
+    position: 'top',
+    axisBorder: {
+      show: false,
+    },
+    axisTicks: {
+      show: false,
+    },
+    tooltip: {
+      enabled: false,
+    },
+    labels: {
+      style: {
+        colors: '#000',
+      }
+    },
+    title: {
+      text: 'کاربران',
+      style: {
+        color: '#000',
+        fontSize: '14px'
+      }
+    },
+  },
+  yaxis: {
+    axisBorder: {
+      show: false,
+    },
+    axisTicks: {
+      show: false,
+    },
+    labels: {
+      show: true,
+      style: {
+        colors: '#000',
+      },
+      
+    },
+    title: {
+      text: 'تعداد آزمون‌ها',
+      style: {
+        color: '#000',
+        fontSize: '14px'
+      },
+      offsetX: -60,
+    },
+  },
+  title: {
+    text: 'تعداد آزمون‌ها بر اساس کاربر',    
+    floating: true,
+    offsetY: 330,
+    align: 'center',
+    style: {
+      color: '#000'
+    }
   },
 };
 
@@ -159,7 +261,7 @@ const pieOptions = {
     {
       icon: "✅",
       title: "بالاترین نمره",
-      value: exams.length ? Math.max(...exams.map(exam => exam.correct_answers / (exam.correct_answers + exam.wrong_answers) * 100)) : 0,
+      value: exams.length ? Math.max(...exams.map(exam => exam.correct_answers / (exam.correct_answers + exam.wrong_answers) * 100)).toFixed(2) : 0,
       gradient: "gradient-green"
     }
   ];
@@ -411,31 +513,35 @@ const pieOptions = {
                 </div>
           </div>
         </div>)}
-      
-        <div className="charts_container">
-          <h2 className="charts_title">نمودار  📊</h2>
-            <div className='chart_container'>
-              {loadingExams ? (
-                <p>در حال بارگذاری نمودار...</p>
-                ) : error ? (
-                <p>{error}</p>
-                ) : ( 
-                <div className="percentage_chart">
-                  {subjectData.length > 0 ? (
-                    
+
+      <div className="charts_container">
+        <h2 className="charts_title">نمودار  📊</h2>
+          <div className='chart_container'>
+          {loadingExams ? (
+            <p>در حال بارگذاری نمودار...</p>
+            ) : error ? (
+            <p>{error}</p>
+            ) : (
+            <>
+              <div className="percentage_chart">
+                {subjectData.length > 0 ? (
                   <Pie data={pieChartData} options={pieOptions} />
                   ) : (
                   <p>هیچ داده‌ای برای نمایش وجود ندارد.</p>
                   )}
                 </div>
-                )}
-              {/* <div className="count_chart">
-                <h3>تعداد آزمون‌ها بر اساس کاربر</h3>
-                <Bar data={barChartData} options={barOptions} />
-              </div> */}
-            </div>
-        </div>
+                <div className="count_chart">
+                    {userExamCounts.length > 0 ? (
+                        <Chart options={barChartOptions} series={barChartOptions.series} type="bar" height={350} width={600} />
+                    ) : (
+                        <p>هیچ داده‌ای برای نمایش وجود ندارد.</p>
+                    )}
+                </div>
+            </>
+            )}
+          </div>
       </div>
+     </div>
     </div>
    );
  };

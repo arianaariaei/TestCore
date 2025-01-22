@@ -186,9 +186,9 @@ export const examService = {
 
     getUserExamCount: async () => {
         try {
-            const response = await api.get('/reports/user-exam-counts', {
+            const response = await api.get('/reports/users-exam-count', {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`, // Adjust according to your auth flow
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
                     'Content-Type': 'application/json',
                 },
             });
