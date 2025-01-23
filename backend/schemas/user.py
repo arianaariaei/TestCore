@@ -34,6 +34,16 @@ class UserCreate(BaseModel):
             raise ValueError('Password must contain at least one uppercase letter')
         return v
 
+class UserResponse(BaseModel):
+    user_id: int
+    name: str
+    email: str
+    university: str
+    is_admin: bool
+
+    model_config = {
+        'from_attributes': True
+    }
 
 class LoginRequest(BaseModel):
     email: EmailStr
