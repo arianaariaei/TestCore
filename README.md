@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="frontend/my-app/src/assets/exam-system-logo.svg" alt="TestCore Logo" width="200"/>
+  <img src="frontend/my-app/src/assets/exam-system-logo.svg" alt="TestCore Logo" width="400"/>
 </p>
 
 ---
